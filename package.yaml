@@ -1,10 +1,10 @@
 name:                aoc-lh
 version:             0.1.0.0
-github:              "githubuser/aoc-lh"
+github:              "mgritter/aoc-lh"
 license:             BSD3
-author:              "Author name here"
+author:              "Mark Gritter"
 maintainer:          "example@example.com"
-copyright:           "2022 Author name here"
+copyright:           "2022 Mark Gritter"
 
 extra-source-files:
 - README.md
@@ -20,7 +20,9 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/aoc-lh#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- liquidhaskell
+- liquid-base
+- sort
 
 ghc-options:
 - -Wall
@@ -32,20 +34,29 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -fplugin=LiquidHaskell
 
 library:
   source-dirs: src
 
 executables:
-  aoc-lh-exe:
+  day1-2021:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         2021/day1
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    dependencies:
-    - aoc-lh
+    - -fplugin=LiquidHaskell
+    
+  day1:
+    main:                Main.hs
+    source-dirs:         2022/day1
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -fplugin=LiquidHaskell
 
 tests:
   aoc-lh-test:

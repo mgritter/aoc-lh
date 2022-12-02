@@ -40,18 +40,9 @@ library:
   source-dirs: src
 
 executables:
-  day1-2021:
+  day2:
     main:                Main.hs
-    source-dirs:         2021/day1
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -fplugin=LiquidHaskell
-    
-  day1:
-    main:                Main.hs
-    source-dirs:         2022/day1
+    source-dirs:         2022/day2
     ghc-options:
     - -threaded
     - -rtsopts

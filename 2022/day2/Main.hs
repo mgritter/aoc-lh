@@ -3,6 +3,7 @@ module Main (main) where
 
 import System.Environment
 import Data.Maybe (mapMaybe)
+import Control.Monad
 
 data RPS =
   Rock |
@@ -93,17 +94,13 @@ parseMoves :: String -> Maybe (RPS, RPS)
 parseMoves s = let tokens = words s in
   if length tokens /= 2 then
     Nothing
-  else case (parseMove $ tokens !! 0, parseMove $ tokens !! 1) of
-    (Just x, Just y) -> Just (x,y)
-    _ -> Nothing
+  else liftM2 (,) (parseMove $ tokens !! 0) (parseMove $ tokens !! 1)
 
 parseMoves2 :: String -> Maybe (RPS, Strategy)
 parseMoves2 s = let tokens = words s in
   if length tokens /= 2 then
     Nothing
-  else case (parseMove $ tokens !! 0, parseStrategy $ tokens !! 1) of
-    (Just x, Just y) -> Just (x,y)
-    _ -> Nothing
+  else liftM2 (,) (parseMove $ tokens !! 0) (parseStrategy $ tokens !! 1) 
 
 {-@ moveToScore :: g:(RPS,RPS) -> {s:Int |
   (beatsM (fst g) = (snd g) => s = scoreForGame FirstWin + scoreForMove (snd g)) &&

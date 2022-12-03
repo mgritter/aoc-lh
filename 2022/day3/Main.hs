@@ -43,12 +43,33 @@ splitIntoThrees :: [String] -> [[String]]
 splitIntoThrees [] = []
 splitIntoThrees l = [(Prelude.take 3 l)] ++ splitIntoThrees (Prelude.drop 3 l)
 
--- {-@ valueOfChar :: c:Char -> {v:Int |
---  (c ='a' => v = 1) &&
---  (c ='z' => v = 26) &&
---  (c ='A' => v = 27) &&
---  (c ='Z' => v = 52) }
--- @-}
+{-@ assume ord :: c:Char -> {i:Int |
+  (c = lit "97" Char => i=97) &&
+  (c = lit "122" Char => i=122) &&
+  (c = lit "65" Char => i=65) &&
+  (c = lit "90" Char => i=90)
+} @-}
+
+{-@ assume isAsciiLower :: c:Char -> {b:Bool |
+  (c = lit "97" Char => b) &&
+  (c = lit "122" Char => b) &&
+  (c = lit "65" Char => not b) &&
+  (c = lit "90" Char => not b)
+} @-}
+
+{-@ assume isAsciiUpper :: c:Char -> {b:Bool |
+  (c = lit "97" Char => not b) &&
+  (c = lit "122" Char => not b) &&
+  (c = lit "65" Char => b) &&
+  (c = lit "90" Char => b)
+} @-}
+
+{-@ valueOfChar :: c:Char -> {v:Int |
+ (c = lit "97" Char => v = 1) &&
+ (c = lit "122" Char => v = 26) &&
+ (c = lit "65" Char => v = 27) &&
+ (c = lit "90" Char => v = 52)
+} @-}
 valueOfChar :: Char -> Int
 valueOfChar c | isAsciiLower c = ord c - ord 'a' + 1
 valueOfChar c | isAsciiUpper c = ord c - ord 'A' + 27

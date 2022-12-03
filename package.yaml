@@ -22,6 +22,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - liquidhaskell
 - liquid-base
+- liquid-containers
+- liquid-vector
+- liquid-bytestring
 - sort
 
 ghc-options:
@@ -38,16 +41,17 @@ ghc-options:
 
 library:
   source-dirs: src
-
+    
 executables:
-  day2:
+  day3:
     main:                Main.hs
-    source-dirs:         2022/day2
+    source-dirs:         2022/day3
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -fplugin=LiquidHaskell
+    dependencies:
+    - aoc-lh
 
 tests:
   aoc-lh-test:

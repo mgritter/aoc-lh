@@ -55,3 +55,94 @@ Error:
 possibilities.
 
 Solution: add a default case (but see above, it might be redundant.)
+
+## Can't inline functions that deconstruct pairs?
+
+Error:
+
+```
+/home/mark/aoc-lh/2022/day4/Main.hs:16:1: error:
+    • Illegal type specification for `Main.contains`
+    Main.contains :: x##1:(GHC.Types.Int, GHC.Types.Int) -> x##2:(GHC.Types.Int, GHC.Types.Int) -> {VV : GHC.Types.Bool | VV <=> lqdc##$select##GHC.Tuple.(,)##1 x##1 <= lqdc##$select##GHC.Tuple.(,)##1 x##2
+                                                                                                                                 && lqdc##$select##GHC.Tuple.(,)##2 x##2 <= lqdc##$select##GHC.Tuple.(,)##2 x##1}
+    Sort Error in Refinement: {VV : bool | (VV <=> lqdc##$select##GHC.Tuple.(,)##1 x##1 <= lqdc##$select##GHC.Tuple.(,)##1 x##2
+                                                   && lqdc##$select##GHC.Tuple.(,)##2 x##2 <= lqdc##$select##GHC.Tuple.(,)##2 x##1)}
+    Unbound symbol lqdc##$select##GHC.Tuple.(,)##1 --- perhaps you meant: GHC.Tuple.(,) ?
+    • 
+   |
+16 | contains (s1,e1) (s2,e2) = s1 <= s2 && e2 <= e1
+   | ^^^^^^^^
+```
+
+*This means*: you tried to inline a function that deconstructs a pair in its definition?  (Unconfirmed.)
+
+Solution: switch to measures that extract the first and second elements
+
+
+## Dependent pair has too few colons
+
+Error:
+
+```
+12 | list4ToRanges (a:b:c:d:[]) = ((a,b),(c,d))
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/mark/aoc-lh/2022/day4/Main.hs:10:22: error:
+    • Illegal type specification for `Main.list4ToRanges`
+    Main.list4ToRanges :: x:{x : [GHC.Types.Int] | len x == 4} -> ((GHC.Types.Int, {y : GHC.Types.Int | x <= y}), (GHC.Types.Int, {y : GHC.Types.Int | x <= y}))
+    Sort Error in Refinement: {y : int | x <= y}
+    The sort [int] is not numeric
+  because
+The sort [int] is not numeric
+```
+
+Possibly a clearer example:
+```
+   • Illegal type specification for `Example.buildRange`
+    Example.buildRange :: lq_tmp$db##0:GHC.Types.Int -> lq_tmp$db##1:GHC.Types.Int -> (GHC.Maybe.Maybe (GHC.Types.Int, {y : GHC.Types.Int | x <= y}))
+    Sort Error in Refinement: {y : int | x <= y}
+    Unbound symbol x --- perhaps you meant: y ?
+    • 
+  |
+7 | {-@ buildRange :: Int -> Int -> Maybe ValidRange @-}
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+
+
+*This means*: you tried to inline a function that deconstructs a pair in its definition?  (Unconfirmed.)
+
+Broken
+```:
+{-@ type ValidRange = (x:Int,{y:Int | x <= y}) @-}
+```
+
+OK:
+```
+{-@ type ValidRange = (x::Int,{y:Int | x <= y}) @-}
+```
+
+Solution: use two colons, I guess.
+
+## Tuple isn't numeric
+
+Problem: I applied an invariant to (Int,Int) but it seems to be being applied to all pairs?!?  (Uncofirmed.)
+
+```
+**** LIQUID: ERROR :1:1-1:1: Error
+  elaborate solver elabBE 562 "VV##F##164" {VV##F##164 : bool | [(VV##F##164 <=> && [((Main.start lq_rnm$xInv##200) <= (Main.end lq_rnm$xInv##200))])]} failed on:
+      VV##F##164 <=> Main.start lq_rnm$xInv##200 <= Main.end lq_rnm$xInv##200
+  with error
+      The sort (Tuple int int) is not numeric
+  because
+Cannot unify int with (Tuple int int) in expression: Main.start lq_rnm$xInv##200 
+  in environment
+      Main.end := func(0 , [(Tuple int int); int])
+
+      Main.start := func(0 , [(Tuple int int); int])
+
+      VV##F##164 := bool
+
+      lq_rnm$xInv##200 := (Tuple (Tuple int int) (Tuple int int)) 
+```
+
+Solution: use a data type for the pair for which you want to specify the invariant, not a tuple

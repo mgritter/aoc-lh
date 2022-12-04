@@ -26,6 +26,7 @@ dependencies:
 - liquid-vector
 - liquid-bytestring
 - sort
+- split
 
 ghc-options:
 - -Wall
@@ -43,9 +44,9 @@ library:
   source-dirs: src
     
 executables:
-  day3:
+  day4:
     main:                Main.hs
-    source-dirs:         2022/day3
+    source-dirs:         2022/day4
     ghc-options:
     - -threaded
     - -rtsopts

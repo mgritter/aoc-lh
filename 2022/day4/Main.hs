@@ -67,16 +67,12 @@ containsEither (x,y) = contains x y || contains y x
 part1 :: [String] -> IO ()
 part1 input = do
   putStrLn "Part 1"
-  print $ length (filter containsEither (catMaybes (map lineToRanges input)))
-
--- (a -> a -> b) -> ((a,a) -> b)
-takePair :: (a->a->b) -> ((a,a) -> b)
-takePair f = \p -> f (fst p) (snd p)
+  print $ length (filter containsEither (mapMaybe lineToRanges input))
 
 part2 :: [String] -> IO ()
 part2 input = do
   putStrLn "Part 2"
-  print $ length (filter (takePair overlaps) (catMaybes (map lineToRanges input)))
+  print $ length (filter (uncurry overlaps) (mapMaybe lineToRanges input))
 
 main :: IO ()
 main = runOnLines part1 part2

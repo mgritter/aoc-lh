@@ -44,9 +44,9 @@ library:
   source-dirs: src
     
 executables:
-  day4:
+  day5:
     main:                Main.hs
-    source-dirs:         2022/day4
+    source-dirs:         2022/day5
     ghc-options:
     - -threaded
     - -rtsopts

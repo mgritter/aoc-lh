@@ -6,6 +6,7 @@ the include files in [liquidhaskell/include](https://github.com/ucsd-progsys/liq
 ## Lists
 
 `len` -- length of a list
+`head`, `tail`
 
 ## Tuples
 

@@ -147,3 +147,23 @@ Cannot unify int with (Tuple int int) in expression: Main.start lq_rnm$xInv##200
 
 Solution: use a data type for the pair for which you want to specify the invariant, not a tuple
 
+## type alias parameter case problems
+
+Problem:  wrong case in
+```
+{-@ type DoesNotInclude a h = DistinctList {v:a | v /= h} @-}
+```
+
+Error message:
+```
+home/mark/aoc-lh/2022/day6/Main.hs:6:10: error:
+    • Illegal type specification for `Main.dlTail`
+    Main.dlTail :: forall a .
+                   lq$recSel:(Main.DistinctList a) -> {VV##0 : (Main.DistinctList {VV : a | VV /= h}) | VV##0 == Main.dlTail lq$recSel}
+    Sort Error in Refinement: {VV : a##xo | VV /= h}
+    Unbound symbol h --- perhaps you meant: VV ?
+    • 
+  |
+6 | {-@ data DistinctList a = Empty
+  |          ^^^^^^^^^^^^^
+```

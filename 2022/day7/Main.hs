@@ -120,9 +120,10 @@ filterQualified used (s:ss) =
   if diskSize - used + s >= needed then s:(filterQualified used ss)
   else (filterQualified used ss)
 
-{-@ minQualified :: used:Int -> original:[Int]
-  -> {qs:[{q:QualifiedSize used | Set_mem q (listElts original)}] | len qs > 0} ->
-  {s:(QualifiedSize used) | Set_mem s (listElts original) } @-}
+{-@ minQualified :: used:Int
+  -> original:[Int]
+  -> {qs:[{q:QualifiedSize used | Set_mem q (listElts original)}] | len qs > 0}
+  -> {s:(QualifiedSize used) | Set_mem s (listElts original) } @-}
 minQualified :: Int -> [Int] -> [Int] -> Int
 minQualified _ _ (s:[]) = s
 minQualified used orig (s:ss) = let m = minQualified used orig ss in
@@ -145,6 +146,8 @@ dirToDelete used (x:xs) =
 -}
 
 -- Only type-checks after rewriting *two* standard functions
+-- Can we somehow tell LH that (listElts qualified) is a subset of (listElts used) in
+-- a more natural way?
 dirToDelete used xs =
   let qualified = filterQualified used xs in
     if length qualified == 0 then Nothing else

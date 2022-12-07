@@ -38,7 +38,8 @@ isDirectory _ = False
 
 {-@ type Dir = {d:FsObj | isDirectory d} @-}
 
-{-@ insertFile :: f:Dir -> {p:DirPath | len p >= 1} -> FsObj -> {f2:FsObj | isDirectory f2 && dirName f2 = dirName f } @-}
+{-@ insertFile :: f:Dir -> {p:DirPath | len p >= 1} -> FsObj
+  -> {f2:Dir | dirName f2 = dirName f } @-}
 insertFile :: FsObj -> DirPath -> FsObj -> FsObj
 insertFile (Directory name contents) (p:[]) obj =
   (Directory name (Map.insert p obj contents))

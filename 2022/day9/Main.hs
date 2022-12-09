@@ -54,7 +54,7 @@ withinTwo _ = False
 {-@ inline withinTwo @-}
 
 {-@ data Sim = Rope {
-  headPos :: Coord,
+  headPos :: Coord,  
   tailPos :: {c:Coord | withinOne ( yCoord c - yCoord headPos )  &&
                             withinOne ( xCoord c - xCoord headPos ) },
   tailLocations :: {s:Set.Set (Int,Int) | Set_mem tailPos s}
@@ -122,11 +122,16 @@ numMoves (U n) = n
 moveCompleteStep :: Sim -> Move -> Sim
 moveCompleteStep sim m = (iterate (moveOneStep m) sim) !! (numMoves m)
 
+
+origin :: Coord
+origin = (0,0)
+
 -- Set.singleton (0,0) does not have member (0,0) true, but why?
+{-@ startPos :: {s:Sim | True } @-}
 startPos :: Sim
-startPos = let z = (0,0) in
-  Rope { headPos = z, tailPos = z,
-         tailLocations = Set.singleton z }
+startPos =
+  Rope { headPos = origin, tailPos = origin,
+         tailLocations = Set.singleton origin }
  
 part1 :: [String] -> IO ()
 part1 input = do
@@ -135,19 +140,79 @@ part1 input = do
     let lastLoc = foldl moveCompleteStep startPos moves in do
       print $ Set.toList (tailLocations lastLoc)
       print $ Set.size (tailLocations lastLoc)
-  
+
+{-
+-- How can we express the relationship between these?
+-- This is fails because the Liquid specification is inconsistent with Haskell,
+-- which permits an arbitrary type!
+-- Or if we use SimPart2 Sim, then it still fails to unify
+{-@ data SimPart2 a =
+   Empty |
+   Chain { headSim :: a ,
+           remainingSim :: SimPart2 {s:Sim | headPos s = tailPos headSim } }
+@-}
+data SimPart2 a =
+  Empty |
+  Chain { headSim :: a,
+          remainingSim :: SimPart2 a }
+-}
+
+{-
+{-@ startPosN :: {n:Int | n >= 1} -> SimPart2 @-}
+startPosN :: Int -> SimPart2
+startPosN 1 = Chain startPos Nothing
+startPosN n = let tail = (startPosN (n-1)) in
+  Chain (Rope {headPos = (headPos (headSim tail)),
+               tailPos = (tailPos (headSim tail)),
+               tailLocations = (tailLocations (headSim tail)) }) (Just tail)
+
+firstSim :: SimPart2 -> Sim
+firstSim (Chain s _) = s
+{-@ measure firstSim @-}
+
+-}
+
+{-@ startPosN :: n:Nat -> {l:[Sim] | len l  = n } @-}
+startPosN :: Int -> [Sim]
+startPosN n = replicate n startPos
+
+{-@ moveTailN :: Coord -> s:[Sim] -> {t:[Sim] | len t = len s} @-}
+moveTailN :: Coord -> [Sim] -> [Sim]
+moveTailN _ [] = []
+moveTailN newHeadPos (x:xs) =
+  if withinTwo ( yCoord newHeadPos - yCoord (tailPos x) ) &&
+     withinTwo ( xCoord newHeadPos - xCoord (tailPos x) ) then
+    let nextTail = nextTailPosition newHeadPos (tailPos x)
+        newFirst = Rope { headPos = newHeadPos,
+                          tailPos = nextTail,
+                          tailLocations = (tailLocations x) `Set.union` (Set.singleton nextTail) }
+    in newFirst:(moveTailN nextTail xs)
+  else
+    (x:xs)    
+   
+{-@ moveOneStepN :: Move -> {s:[Sim] | len s > 0} -> {t:[Sim] | len t = len s} @-}
+moveOneStepN :: Move -> [Sim] -> [Sim]
+moveOneStepN m (x:xs) =
+  let newHead = moveOneStep m x in
+    newHead : (moveTailN (tailPos newHead) xs )
+
+{-@ ignore moveCompleteStepN @-}
+{-@ moveCompleteStepN :: {s:[Sim] | len s > 0} -> Move -> {t:[Sim] | len t = len s} @-}
+moveCompleteStepN :: [Sim] -> Move -> [Sim]
+moveCompleteStepN sims m = (iterate (moveOneStepN m) sims) !! (numMoves m)
+
 part2 :: [String] -> IO ()
 part2 input = do
   putStrLn "Part 2"
+  let moves = mapMaybe parseMove input in
+    let lastKnots = foldl moveCompleteStepN (startPosN 9) moves in
+      if length lastKnots /= 9 then
+        putStrLn "Missing knots!"
+      else let lastLoc = last lastKnots in do
+        print $ Set.toList (tailLocations lastLoc)
+        print $ Set.size (tailLocations lastLoc)
+
 
 main :: IO ()
 main = runOnLines part1 part2
-
--- [(-2,-1),(-1,-2),(-1,-1),(-1,0),(0,-2),(0,-1),(0,0),(0,1),(1,-2),(2,-1),(2,0),(2,1)]
---
--- .....
--- .....
--- .....
--- .....
--- s#...
  

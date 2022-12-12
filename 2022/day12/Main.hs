@@ -84,8 +84,8 @@ liftIsValid h (Just c) = isValid h c
 {-@ findStartAndEnd :: h:HeightMap -> [String] -> (Maybe (ValidCoord h), Maybe (ValidCoord h)) @-}
 findStartAndEnd :: HeightMap -> [String] -> (Maybe Coord, Maybe Coord)
 findStartAndEnd h ss = let input = fseFlatten $ fseLoop ss in
-  ( liftIsValid h $ (liftM fst) $ find (\(p,c) -> c == 'S') input,
-    liftIsValid h $ (liftM fst) $ find (\(p,c) -> c == 'E') input )
+  ( liftIsValid h $ (liftM fst) $ find (\(_,c) -> c == 'S') input,
+    liftIsValid h $ (liftM fst) $ find (\(_,c) -> c == 'E') input )
 
 withinOne :: Int -> Bool
 withinOne 1 = True
@@ -97,16 +97,32 @@ withinOne _ = False
 {-@ type NeighborCoord H C = {d:Coord | (xCoord C = xCoord d && withinOne (yCoord C - yCoord d)) ||
                                         (yCoord C = yCoord d && withinOne (xCoord C - xCoord d)) } @-}
 
-{-@ adjacent :: h:HeightMap -> v:ValidCoord h -> n:NeighborCoord h v -> Maybe (ValidCoord h) @-}
-adjacent :: HeightMap -> Coord -> Coord -> Maybe Coord
-adjacent h (y,x) n = case isValid h n of
+{-@ part1Adj :: h:HeightMap
+   -> v1:ValidCoord h -> ValidCoord h -> Bool @-}
+part1Adj :: HeightMap -> Coord -> Coord -> Bool
+part1Adj h p n = (height h p >= height h n) || (1 + height h p == height h n)
+
+{-@ part2Adj :: h:HeightMap
+   -> v2:ValidCoord h -> ValidCoord h -> Bool @-}
+part2Adj :: HeightMap -> Coord -> Coord -> Bool
+part2Adj h p n = part1Adj h n p
+
+-- the "ok a b" function says it's OK to transition from a to b
+{-@ adjacent :: h:HeightMap
+   -> (ValidCoord h -> ValidCoord h -> Bool)
+   -> v2:ValidCoord h -> n:NeighborCoord h v2
+   -> Maybe (ValidCoord h) @-}
+adjacent :: HeightMap -> (Coord->Coord->Bool) -> Coord -> Coord -> Maybe Coord
+adjacent h ok (y,x) n = case isValid h n of
    Nothing -> Nothing
-   Just vn -> if (height h (y,x) >= height h vn) || (1 + height h (y,x) == height h vn) then Just vn
+   Just vn -> if ok (y,x) vn then Just vn
      else Nothing
 
-{-@ allAdjacent :: h:HeightMap -> v:ValidCoord h -> [ValidCoord h] @-}
-allAdjacent :: HeightMap -> Coord -> [Coord]
-allAdjacent h (y,x) = mapMaybe (adjacent h (y,x)) [(y+1,x),(y-1,x),(y,x+1),(y,x-1)] 
+{-@ allAdjacent :: h:HeightMap
+  -> (ValidCoord h -> ValidCoord h -> Bool)
+  -> v:ValidCoord h -> [ValidCoord h] @-}
+allAdjacent :: HeightMap -> (Coord->Coord->Bool) -> Coord -> [Coord]
+allAdjacent h ok (y,x) = mapMaybe (adjacent h ok (y,x)) [(y+1,x),(y-1,x),(y,x+1),(y,x-1)] 
 
 {-@ data QueueEntry c = QE { pos :: c, path :: [c] } @-}
 data QueueEntry c = QE { pos :: c, path :: [c] }
@@ -115,30 +131,45 @@ data QueueEntry c = QE { pos :: c, path :: [c] }
 -- TODO: it would be awfully nice to have the list guarantee that its items were all adjacent to
 -- each other, but we can't inline adjacent due to its use of ! via height.  Can we hide its
 -- definition somehow?
-{-@ ignore bfs @-}
-{-@ bfs :: h:HeightMap -> start:ValidCoord h -> goal:ValidCoord h -> IO (Maybe [ValidCoord h]) @-}
-bfs :: HeightMap -> Coord -> Coord -> IO (Maybe [Coord])
-bfs h start goal = do
-  x <- bfsLoop h goal (Set.singleton start) [QE start []] 
-  case x of
-    Nothing -> return $ Nothing
-    Just qe -> return $ Just $  path qe
+--
+-- Alternative idea: create a type only returned by adjacent, like this:
+{-@ data AdjacentCoord = AC { pathLoc:: Coord, prevInPath :: Coord } @-}
+data AdjacentCoord = AC { pathLoc:: Coord, prevInPath :: Coord }
+-- Then specify a refinement list type which links the elements together
+{-@ data AdjacentCoordList =
+    StartState { startCoord :: Coord } |
+    NextState { headCoord :: AdjacentCoord, tailCoords :: ListStartingWith (prevInPath headCoord)  }
+@-}
+{-@ measure headAC :: AdjacentCoordList -> Coord
+headAC (StartState c) = c
+headAC (NextState ac _) = pathLoc ac
+@-}
+{-@ type ListStartingWith C = {acl:AdjacentCoordList | headAC acl = C} @-}
+data AdjacentCoordList =
+    StartState Coord |
+    NextState AdjacentCoord AdjacentCoordList
 
-{-@ ignore bfsLoop @-}
-{-@ bfsLoop :: h:HeightMap -> goal:ValidCoord h -> visited:Set.Set Coord-> q:[QueueEntry (ValidCoord h)]
- -> IO (Maybe (QueueEntry (ValidCoord h))) @-}
-bfsLoop :: HeightMap -> Coord -> Set.Set Coord -> [QueueEntry Coord] -> IO (Maybe (QueueEntry Coord))
-bfsLoop _ _ _ [] = do
-  putStrLn "Empty queue!"
-  return Nothing
-bfsLoop h goal visited (q:qs) = if (pos q) == goal then return $ Just q
-  else do
-     putStrLn $ "Visiting: " ++ (show q) -- ++ " Queue: " ++ (show qs)
-     bfsLoop h goal newVisited (qs ++ newEntries) where
-       adj = allAdjacent h (pos q)
-       unvisited = filter (\c -> not (Set.member c visited)) adj
-       newVisited = visited `Set.union` (Set.fromList unvisited)
-       newEntries = map (\c -> QE c ((path q) ++ [c])) unvisited
+-- But here's the real implementation:
+{-@ bfs :: h:HeightMap -> start:ValidCoord h
+   -> ok:(ValidCoord h->ValidCoord h->Bool)
+   -> goal:(ValidCoord h -> Bool) -> Maybe [ValidCoord h] @-}
+bfs :: HeightMap -> Coord -> (Coord->Coord->Bool) -> (Coord->Bool) -> Maybe [Coord]
+bfs h start ok goal =
+  let x = bfsLoop h ok goal (Set.singleton start) [QE start []] in
+    case x of
+     Nothing -> Nothing
+     Just qe -> Just $ path qe
+
+{-@ bfsLoop :: h:HeightMap -> ok:(ValidCoord h -> ValidCoord h -> Bool) -> goal:(ValidCoord h->Bool) -> visited:Set.Set Coord-> q:[QueueEntry (ValidCoord h)]
+ -> Maybe (QueueEntry (ValidCoord h)) @-}
+bfsLoop :: HeightMap -> (Coord->Coord->Bool) -> (Coord->Bool) -> Set.Set Coord -> [QueueEntry Coord] -> Maybe (QueueEntry Coord)
+bfsLoop _ _ _ _ [] = Nothing
+bfsLoop h ok goal visited (q:qs) = if goal (pos q) then Just q
+  else bfsLoop h ok goal newVisited (qs ++ newEntries) where
+    adj = allAdjacent h ok (pos q)
+    unvisited = filter (\c -> not (Set.member c visited)) adj
+    newVisited = visited `Set.union` (Set.fromList unvisited)
+    newEntries = map (\c -> QE c ((path q) ++ [c])) unvisited
 
 part1 :: [String] -> IO ()
 part1 input = do
@@ -152,16 +183,30 @@ part1 input = do
         (Just start, Just goal ) -> do
           print start
           print goal
-          result <- bfs h start goal
-          case result of
-            Nothing -> putStrLn "Couldn't find path"
-            Just p -> do
-              print p
-              print (length p)
+          let result = bfs h start (part1Adj h) (\c -> goal == c) in
+            case result of
+              Nothing -> putStrLn "Couldn't find path"
+              Just p -> do
+                print p
+                print (length p)
 
 part2 :: [String] -> IO ()
 part2 input = do
   putStrLn "Part 2"
+  case readHeightMap input of
+    Nothing -> putStrLn "Invalid input"
+    Just h ->
+      case findStartAndEnd h input of
+        (_,Nothing) -> putStrLn "No end"
+        (_,Just endPos) -> do
+          print endPos
+          let result = bfs h endPos (part2Adj h) (\c -> height h c == 1) in
+            case result of
+              Nothing -> putStrLn "Couldn't find path"
+              Just p -> do
+                print p
+                print (length p)
+
 
 main :: IO ()
 main = runOnLines part1 part2

@@ -101,7 +101,7 @@ withinOne _ = False
 adjacent :: HeightMap -> Coord -> Coord -> Maybe Coord
 adjacent h (y,x) n = case isValid h n of
    Nothing -> Nothing
-   Just vn -> if withinOne ( (height h (y,x)) - (height h vn) ) then Just vn
+   Just vn -> if (height h (y,x) >= height h vn) || (1 + height h (y,x) == height h vn) then Just vn
      else Nothing
 
 {-@ allAdjacent :: h:HeightMap -> v:ValidCoord h -> [ValidCoord h] @-}
@@ -133,7 +133,7 @@ bfsLoop _ _ _ [] = do
   return Nothing
 bfsLoop h goal visited (q:qs) = if (pos q) == goal then return $ Just q
   else do
-     print $ "Visiting: " ++ (show q) ++ " Queue: " ++ (show qs)
+     putStrLn $ "Visiting: " ++ (show q) -- ++ " Queue: " ++ (show qs)
      bfsLoop h goal newVisited (qs ++ newEntries) where
        adj = allAdjacent h (pos q)
        unvisited = filter (\c -> not (Set.member c visited)) adj

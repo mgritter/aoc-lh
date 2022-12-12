@@ -167,3 +167,59 @@ home/mark/aoc-lh/2022/day6/Main.hs:6:10: error:
 6 | {-@ data DistinctList a = Empty
   |          ^^^^^^^^^^^^^
 ```
+
+## WTF tuples again
+
+Trying to import (0,0) into the specification language.
+
+```
+{-@ origin :: Coord @-}
+origin :: Coord
+origin = (0,0)
+{-@ inline origin @-}```
+
+```
+/home/mark/aoc-lh/2022/day9/Main.hs:127:1: error:
+    Liquid Type Mismatch
+    .
+    The inferred type
+      VV : {v : (GHC.Types.Int, GHC.Types.Int) | x_Tuple22 v == 0
+                                                 && x_Tuple21 v == 0
+                                                 && snd v == 0
+                                                 && fst v == 0
+                                                 && Main.xCoord v == 0
+                                                 && Main.yCoord v == 0}
+    .
+    is not a subtype of the required type
+      VV : {VV : (GHC.Types.Int, GHC.Types.Int) | VV == GHC.Tuple.(,) 0 0}
+    .
+    |
+127 | origin = (0,0)
+    | ^^^^^^^^^^^^^^
+
+```
+
+## Mismatched braces panic GHC
+
+
+```
+{-@ finishInstruction :: {c:CpuState | remainingCycles c = 1 } ->
+    {d:CpuState | remainingCycles d = 0 -@}
+{-
+&& currCycle d = currCycle c + 1 &&
+     inProgress d = Nothing &&
+     ( inProgress c = Just Noop => xReg c = xReg d ) }
+@-}
+-}
+```
+
+Error:
+
+```
+ghc: panic! (the 'impossible' happened)
+  (GHC version 8.10.1:
+	Malformed annotation
+    A valid specification must have a closing '@-}'.
+
+Please report this as a GHC bug:  https://www.haskell.org/ghc/reportabug
+```

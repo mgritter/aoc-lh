@@ -199,6 +199,14 @@ origin = (0,0)
 
 ```
 
+Solution:
+
+```
+{-@ LIQUID "--exact-data-cons" @-}
+```
+
+maybe?
+
 ## Mismatched braces panic GHC
 
 

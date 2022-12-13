@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      LHMap
       LoadLines
   other-modules:
       Paths_aoc_lh
@@ -35,26 +36,34 @@ library
       liquid-base
     , liquid-bytestring
     , liquid-containers
+    , liquid-prelude
     , liquid-vector
     , liquidhaskell
+    , parsec
     , sort
     , split
   default-language: Haskell2010
 
-executable day5
+executable day11
   main-is: Main.hs
   other-modules:
+      LengthLemmas
+      Puzzle
       Paths_aoc_lh
   hs-source-dirs:
-      2022/day5
+      2022/day11
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=LiquidHaskell -threaded -rtsopts -with-rtsopts=-N
+  include-dirs:
+      2022/day11
   build-depends:
       aoc-lh
     , liquid-base
     , liquid-bytestring
     , liquid-containers
+    , liquid-prelude
     , liquid-vector
     , liquidhaskell
+    , parsec
     , sort
     , split
   default-language: Haskell2010
@@ -72,8 +81,10 @@ test-suite aoc-lh-test
     , liquid-base
     , liquid-bytestring
     , liquid-containers
+    , liquid-prelude
     , liquid-vector
     , liquidhaskell
+    , parsec
     , sort
     , split
   default-language: Haskell2010

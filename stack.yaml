@@ -51,7 +51,8 @@ extra-deps:
       - liquid-vector
       - liquid-bytestring
       - liquid-containers
-      - liquid-ghc-prim 
+      - liquid-ghc-prim
+      - liquid-prelude
   - git: https://github.com/ucsd-progsys/liquid-fixpoint
     commit: d0a6619f97aa605b4b57e3bc8d261186182ebf84
 

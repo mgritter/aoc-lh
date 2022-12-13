@@ -1,8 +1,11 @@
 module Main (main) where
+-- {-@ LIQUID "--reflection" @-}
 
+-- import Prelude hiding (length, filter)
 import LoadLines
 import Language.Haskell.Liquid.ProofCombinators
-
+-- import LengthLemmas
+  
 {-@
 data Monkey =
   M { number :: Nat,
@@ -74,39 +77,17 @@ countOfItems Empty = 0
 countOfItems (MCons m ms) = len (items m) + countOfItems ms
 @-}
 
-{-@ myFilter :: (a->Bool) -> [a] -> [a] @-}
-myFilter :: (a -> Bool) -> [a] -> [a]
-myFilter pred [] = []
-myFilter pred (x:xs) = if pred x then x:(myFilter pred xs) else (myFilter pred xs)
--- This doesn't work
--- {-@ reflect myFilter @-}
-
-{-@ mySndFilter :: b -> [(a,b)] -> [(a,b)] @-}
-mySndFilter :: Eq b => b -> [(a,b)] -> [(a,b)]
-mySndFilter _ [] = []
-mySndFilter p (x:xs) = if snd x == p then x:(mySndFilter p xs) else (mySndFilter p xs)
--- This doesn't work either
--- {-@ reflect mySndFilter @-}
-
-{-
-{-@ lemmaOnFilter :: pred:(a->Bool) -> l:[a] ->
-  { len (myFilter pred l ) + len (myFilter (not . pred) l) = len l } @-}
-lemmaOnFilter :: (a -> Bool) -> [a] -> Proof
-lemmaOnFilter pred [] = ()
-lemmaOnFilter pred (x:xs) = undefined
--}
-
 {-
 {-@ distribute2 :: m:MonkeyList -> {mi:[MonkeyItem 8] | len mi <= mLen m}
      -> {m2:MonkeyList | mLen m2 = mLen m && countOfItems m2 = countOfItems m + len mi} @-}
 distribute2 :: MonkeyList -> [(Int,Int)] -> MonkeyList 
 distribute2 Empty [] = Empty
+distribute2 Empty _ = error "Shouldn't happen"
 distribute2 (MCons m ms) destinations =
-  MCons (m {items = (items m) ++ newItems}) (distribute2 ms (filter (not .toMe) destinations)) where
+  MCons (m {items = (items m) ++ newItems}) (distribute2 ms (filter (notP toMe) destinations)) where
   newItems = map fst (filter toMe destinations)
   toMe (_,d) = d == number m
 -}
-
 
 {-@ distribute :: x:Int -> m:[MonkeyIR x] -> mi:[MonkeyItem x]
      -> {m2:[MonkeyIR x] | len m2 = len m} @-}

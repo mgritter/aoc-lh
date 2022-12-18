@@ -1,7 +1,7 @@
-module Maximum where
+module Maximum (maximum, member, maximumIsGte) where
 
 import Language.Haskell.Liquid.ProofCombinators
-import Prelude hiding (maximum, member)
+import Prelude hiding (maximum)
 
 {-@ LIQUID "--reflection" @-}
 
@@ -16,8 +16,6 @@ maximum (x:xs) = let m = maximum xs in
 -- some other data type that encoded the guarantee, maybe, but
 -- it seems best to write a proof.
 
--- Adding inline here crashes GHC!
-
 {-@ member :: a -> [a] -> Bool @-}
 member :: Eq a => a -> [a] -> Bool
 member _ [] = False
@@ -26,11 +24,9 @@ member x (y:ys) = if x == y then True else member x ys
 {-@ reflect member @-}
 {-@ reflect maximum @-}
 
-{-@ maximumIsGte :: xs:[a] -> x:a ->
+{-@ maximumIsGte :: {xs:[a] | len xs > 0} -> x:a ->
   { member x xs => maximum xs >= x } @-}
 maximumIsGte :: Ord a => [a] -> a -> Proof
-maximumIsGte [] y =
-  False === member y [] *** QED
 maximumIsGte (x:[]) y =
   if y == x then
     member y (x:[])

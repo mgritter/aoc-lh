@@ -27,11 +27,12 @@ library
   exposed-modules:
       LHMap
       LoadLines
+      Maximum
   other-modules:
       Paths_aoc_lh
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=LiquidHaskell
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -fplugin=LiquidHaskell
   build-depends:
       liquid-base
     , liquid-bytestring
@@ -44,17 +45,15 @@ library
     , split
   default-language: Haskell2010
 
-executable day11
+executable day18
   main-is: Main.hs
   other-modules:
-      LengthLemmas
-      Puzzle
       Paths_aoc_lh
   hs-source-dirs:
-      2022/day11
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=LiquidHaskell -threaded -rtsopts -with-rtsopts=-N
+      2022/day18
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -fplugin=LiquidHaskell -threaded -rtsopts -with-rtsopts=-N
   include-dirs:
-      2022/day11
+      2022/day18
   build-depends:
       aoc-lh
     , liquid-base
@@ -75,7 +74,7 @@ test-suite aoc-lh-test
       Paths_aoc_lh
   hs-source-dirs:
       test
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fplugin=LiquidHaskell -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -fplugin=LiquidHaskell -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc-lh
     , liquid-base

@@ -38,7 +38,6 @@ ghc-options:
 - -Wincomplete-uni-patterns
 - -Wmissing-export-lists
 - -Wmissing-home-modules
-- -Wpartial-fields
 - -Wredundant-constraints
 - -fplugin=LiquidHaskell
 
@@ -46,15 +45,15 @@ library:
   source-dirs: src
     
 executables:
-  day11:
+  day18:
     main:                Main.hs
-    source-dirs:         2022/day11
+    source-dirs:         2022/day18
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     include-dirs:
-    - 2022/day11
+    - 2022/day18
     dependencies:
     - aoc-lh
 

@@ -97,6 +97,19 @@ packages:
     git: https://github.com/ucsd-progsys/liquidhaskell
     subdir: liquid-ghc-prim
 - completed:
+    commit: 269dd34ad90699f5d09752c8aa3a99d589f8668b
+    git: https://github.com/ucsd-progsys/liquidhaskell
+    name: liquid-prelude
+    pantry-tree:
+      sha256: 8c10488e8c2faa4c93cccce82907aac85fec57e7170d687cfb1a700f62c583f5
+      size: 1029
+    subdir: liquid-prelude
+    version: 0.8.10.1
+  original:
+    commit: 269dd34ad90699f5d09752c8aa3a99d589f8668b
+    git: https://github.com/ucsd-progsys/liquidhaskell
+    subdir: liquid-prelude
+- completed:
     commit: d0a6619f97aa605b4b57e3bc8d261186182ebf84
     git: https://github.com/ucsd-progsys/liquid-fixpoint
     name: liquid-fixpoint

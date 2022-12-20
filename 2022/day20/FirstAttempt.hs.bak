@@ -1,0 +1,130 @@
+module Main (main) where
+
+import LoadLines
+import qualified Data.Map as Map
+
+{-@
+data LinkedListNode = LL {
+  originalIndex :: Int,
+  value :: Int,
+  leftIndex :: Int,
+  rightIndex :: Int }
+@-}
+data LinkedListNode = LL {
+  originalIndex :: Int,
+  value :: Int,
+  leftIndex :: Int,
+  rightIndex :: Int }
+
+{-@
+data IndexLinkedList = ILL {
+  indexLength :: Nat,
+  originalLocations :: {ol:[InRangeListNode indexLength] | len ol = indexLength },
+  headIndex :: {n:Int | n >= 0 && n < indexLength},
+  tailIndex :: {n:Int | n >= 0 && n < indexLength}
+}
+@-}
+{-@ type InRangeListNode L =
+  {n:LinkedListNode | 0 <= leftIndex n && leftIndex n < L &&
+                      0 <= rightIndex n && rightIndex n < L
+  }
+@-}
+
+data IndexLinkedList = ILL {
+  indexLength :: Int,
+  originalLocations :: [LinkedListNode],
+  headIndex :: Int,
+  tailIndex :: Int
+}
+
+{-@ appendLL ::
+  { ll:IndexLinkedList | indexLength ll > 0 }
+  -> val:Int
+  -> { ll2:IndexLinkedList | indexLength ll2 = indexLength ll + 1  }
+@-}
+appendLL :: IndexLinkedList -> Int -> IndexLinkedList
+appendLL ill val =
+  let newIndex = indexLength ill
+      newNode = LL newIndex val (tailIndex ill) (headIndex ill)
+      oldTail = (originalLocations ill) !! (tailIndex ill)
+      newTail = LL {
+        originalIndex = originalIndex oldTail,
+        value = value oldTail,
+        leftIndex = leftIndex oldTail,
+        rightIndex = newIndex
+        } in
+    ILL {
+      indexLength = indexLength ill + 1,
+      headIndex = headIndex ill,
+      tailIndex = newIndex,
+      originalLocations =
+          (take (indexLength ill - 1) (originalLocations ill)) ++
+          [ newTail, newNode ]
+        }
+
+
+{-@ singletonLL :: Int -> {ll:IndexLinkedList | indexLength ll = 1} @-}
+singletonLL :: Int -> IndexLinkedList
+singletonLL val =  
+    ILL {
+      indexLength = 1,
+      headIndex = 0,
+      tailIndex = 0,
+      originalLocations = [LL 0 val 0 0]
+      }
+
+{-@ buildLL :: {l:[Int] | len l > 0} -> IndexLinkedList @-}
+buildLL :: [Int] -> IndexLinkedList
+buildLL values =
+  foldl appendLL (singletonLL (head values)) (tail values)
+-- foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b
+
+{-@ getNode :: ll:IndexLinkedList -> {i:Nat | i < indexLength ll}
+  -> j:InRangeListNode (indexLength ll) @-}
+getNode :: IndexLinkedList -> Int -> LinkedListNode
+getNode ill i = (originalLocations ill) !! i
+
+{-@ rightNode :: ll:IndexLinkedList -> {i:Nat | i < indexLength ll}
+  -> {j:Nat | j < indexLength ll} @-}
+rightNode :: IndexLinkedList -> Int -> Int
+rightNode ill i = rightIndex (getNode ill i)
+
+{-@ lazy toList @-}
+toList :: IndexLinkedList -> [Int]
+toList ill = recurse (headIndex ill) where
+  {-@ recurse :: {i:Nat | i < indexLength ill} -> [Int]  @-}
+  recurse i =
+    let node = (originalLocations ill) !! i in
+      if (originalIndex node) == (tailIndex ill) then
+        [(value node)]
+      else
+        (value node):(recurse (rightIndex node))
+
+removeLL :: IndexLinkedList -> Int -> (IndexLinkedList,LinkedListNode)
+removeLL ill originalIndex =
+  let node = getNode ill originalIndex
+      leftNode = getNode ill (leftIndex node)
+      rightNode = getNode ill (rightIndex node)
+      newLeft = leftNode { rightIndex = originalIndex rightNode }
+      newRight = rightNode { leftIndex = originalIndex leftNode }
+      -- gave up here because this is bogus, we need to break the list appart and
+      -- append it again which is O(n) so we might as well just search the damn list
+      -- in the first place.
+    
+moveRight :: IndexLinkedList -> Int -> Int -> IndexLinkedList
+moveRight originalIndex amount
+
+part1 :: [String] -> IO ()
+part1 input = do
+  putStrLn "Part 1"
+  if length input == 0 then putStrLn "Input empty"
+    else let ll = buildLL (map read input) in
+           print $ toList ll
+
+part2 :: [String] -> IO ()
+part2 input = do
+  putStrLn "Part 2"
+
+main :: IO ()
+main = runOnLines part1 part2
+

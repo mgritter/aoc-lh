@@ -72,6 +72,7 @@ euclideanMod a m = let x = a `mod` m in
 
 -- when using `mod` the newPos could be negative.  Why wasn't LH catching this?
 -- TODO: build a small test case
+-- Resolved: local experimentation was using -2 `mod` 5, not (-2) `mod` 5
 {-@ processEntry :: {xs:[ListEntry] | len xs > 1}
   -> Int -> Int
   -> {ys:[ListEntry] | len ys = len xs} @-}

@@ -4,6 +4,7 @@ import LoadLines
 import Data.List.Split
 import Data.List
 import Data.Maybe
+import qualified Data.Set as Set
 
 {-@ 
 data Resources =
@@ -17,7 +18,7 @@ data Resources =
        clay :: Int,
        obsidian :: Int,
        geode :: Int }
-  deriving (Show)
+  deriving (Show,Eq,Ord)
 
 {-@ totalResources :: Resources -> Nat @-}
 totalResources :: Resources -> Int
@@ -43,7 +44,7 @@ mult s r1 = RS {
   ore = s * ore r1,
   clay = s * clay r1,
   obsidian = s * obsidian r1,
-  geode = s * geode r2
+  geode = s * geode r1
   }
 
 -- True if r1 >= r2 pointwise
@@ -78,6 +79,29 @@ data SearchState =
        robots :: Resources,
        report :: String }
 
+showState :: SearchState -> String
+showState (SS tr inventory robots _) =
+  "tr " ++ (show tr) ++ " (O" ++ (show $ ore inventory)
+  ++ ", C" ++ (show $ clay inventory)
+  ++ ", B" ++ (show $ obsidian inventory)
+  ++ ", G" ++ (show $ geode inventory)
+  ++ ") (O" ++ (show $ ore robots)
+  ++ ", C" ++ (show $ clay robots)
+  ++ ", B" ++ (show $ obsidian robots)
+  ++ ", G" ++ (show $ geode robots) ++ ")"
+
+eqState :: SearchState -> SearchState -> Bool
+eqState s1 s2 = timeRemaining s1 == timeRemaining s2 && robots s1 == robots s2 && resources s1 == resources s2
+
+compareState :: SearchState -> SearchState -> Ordering
+compareState s1 s2 = compare (timeRemaining s1, resources s1, robots s1) (timeRemaining s2, resources s2, robots s2)
+
+instance Show SearchState where show = showState
+instance Eq SearchState where
+  (==) = eqState
+  (/=) = (\a b -> not (eqState a b))
+instance Ord SearchState where compare = compareState
+
 {-@
 data Recipe =
   RC { recipeId :: Nat,
@@ -91,18 +115,17 @@ data Recipe =
      }
 
 -- Return all possibilities for what we can build with the existing resources
+-- Oops, assembly robot can only work on one thing!  So only one robot build is possible.
 -- List is (new robots, remaining resources)
 {-@ canBuild :: recipe:Recipe -> avail:Resources -> {options:[(Resources,Resources)] | len options > 0}
-   / [ len (costs recipe), totalResources avail ]
+   / [ len (costs recipe) ]
 @-}
 canBuild :: Recipe -> Resources -> [(Resources,Resources)]
 canBuild (RC _ []) available = [(RS 0 0 0 0, available)]
-canBuild orig@(RC i ((newRobots, costs):rest)) available =
+canBuild (RC i ((newRobots, costs):rest)) available =
           if available `resourceGte` costs then
-            (canBuild (RC i rest) available) ++
-            (map
-              (\(r,c) -> (add newRobots r, c))
-              (canBuild orig (sub available costs)))
+            (newRobots,sub available costs):
+            (canBuild (RC i rest) available)
           else
             canBuild (RC i rest) available
     
@@ -171,6 +194,7 @@ successors r s =
 --       resources_i(t+1) = resources_it - cost(purchases_it) + robots_it
 -- Yes, an ILP :(
 
+{-
 -- Return the next time when the given amount of resources are available, or Nothing if never
 {-@ timeAvailable :: SearchState -> r:Resources -> Maybe {s2:SearchState | resourceGte (resources s2) r} @-}
 timeAvailable :: SearchState -> Resources -> Maybe SearchState
@@ -222,18 +246,38 @@ successors2 r s =
              resources = resourcesAtEnd,
              robots = add (robots s) newRobots,
              report = (report s) ++ "Time " ++ (show (timeRemaining s)) ++ " built " ++ (show newRobots) ++ " have " ++ (show resourcesAtEnd) ++ "\n" }
-
+-}
 
 orderByGeodes :: SearchState -> SearchState -> Ordering
 orderByGeodes a b = compare (geode (resources a)) (geode (resources b))
 
-{-@ dfsMostGeodes :: Recipe -> s:SearchState -> SearchState
-  / [timeRemaining s] @-}
-dfsMostGeodes :: Recipe -> SearchState -> SearchState
-dfsMostGeodes recipe start =
-  if timeRemaining start == 0 then start else
+{-@ dfsMostGeodes :: Recipe -> start:SearchState -> Set.Set SearchState -> (SearchState, Set.Set SearchState)
+  / [timeRemaining start] @-}
+dfsMostGeodes :: Recipe -> SearchState -> Set.Set SearchState -> (SearchState, Set.Set SearchState)
+dfsMostGeodes recipe start visited0 =
+  if timeRemaining start == 0 then (start,visited0) else
     let ss = successors recipe start in
-      maximumBy orderByGeodes (map (dfsMostGeodes recipe) ss)
+      {-@ visit :: succ:[{x:SearchState | timeRemaining x < timeRemaining start && timeRemaining x >= 0}]
+                   -> Set.Set SearchState
+                   -> SearchState -> (SearchState, Set.Set SearchState)
+                   / [len succ] @-}
+      visit ss visited0 start where
+      visit :: [SearchState] -> Set.Set SearchState -> SearchState -> (SearchState, Set.Set SearchState)
+      visit [] visited best = (best,visited)
+      visit (s':rest) visited best =
+        if Set.member s' visited then
+          visit rest visited best
+        else
+          let (b', v') = dfsMostGeodes recipe s' (visited `Set.union` (Set.singleton s')) in
+            visit rest v' (if orderByGeodes best b' == GT then best else b')
+
+{-@ dfsStream :: Recipe -> s:SearchState -> [SearchState] @-}
+{-@ lazy dfsStream @-}
+dfsStream :: Recipe -> SearchState -> [SearchState]
+dfsStream recipe start =
+  if timeRemaining start == 0 then [start] else
+    let ss = successors recipe start in
+      start:(ss >>= dfsStream recipe)
 
 initState :: SearchState
 initState = SS { timeRemaining = 24,
@@ -243,7 +287,7 @@ initState = SS { timeRemaining = 24,
   
 qualityLevel :: Recipe -> Int
 qualityLevel r =
-  let maxG = dfsMostGeodes r initState in
+  let (maxG, _) = dfsMostGeodes r initState Set.empty in
     (geode (resources maxG)) * (recipeId r)
 
 part1 :: [String] -> IO ()
@@ -252,9 +296,10 @@ part1 input = do
   let recipes = mapMaybe parseRecipe input
       qls = map (\r -> (r, qualityLevel r)) recipes in do
     if length recipes >= 2 then do
-      putStrLn (report $ dfsMostGeodes (recipes !! 0) initState)
-      putStrLn (report $ dfsMostGeodes (recipes !! 1) initState)
-    else
+      -- _ <- mapM print (dfsStream (recipes !! 0) initState)
+      putStrLn (report $ fst $ dfsMostGeodes (recipes !! 0) initState Set.empty)
+      putStrLn (report $ fst $ dfsMostGeodes (recipes !! 1) initState Set.empty)
+    else do
       putStrLn "Too few recipes!"
     _ <- mapM (\(r,q) -> 
                   putStrLn $ "Recipe " ++ (show (recipeId r)) ++ " quality " ++ (show q)) qls

@@ -1,0 +1,114 @@
+module Repro (part1) where
+
+import qualified Data.Map as Map
+import Data.List.Split
+import Data.Either
+import Data.Maybe
+import Control.Monad.ST
+import Data.STRef
+
+{-@
+data Expr =
+  Constant Int |
+  Add { arg1::String, arg2 :: String} |
+  Mul { arg1::String, arg2 :: String} |
+  Div { arg1::String, arg2 :: String} |
+  Sub { arg1::String, arg2 :: String}
+@-}
+data Expr =
+  Constant Int |
+  Add String String |
+  Mul String String |
+  Div String String |
+  Sub String String
+  deriving (Show)
+
+{-@ data Monkey = M { name :: String, expr :: Expr } @-}
+data Monkey = M { name :: String, expr :: Expr }
+  deriving (Show)
+
+--  0  1 2
+-- sllz: 4
+--  0   1 2   3  4
+-- pppw: cczh / lfqf
+parseMonkey :: String -> Maybe Monkey
+parseMonkey s = let tok = splitOneOf " :" s in
+  if length tok == 3 then
+    Just $ M { name = (tok !! 0), expr = Constant (read (tok !! 2)) }
+  else if length tok == 5 then case (tok !! 3) of
+    "+" -> Just $ M { name = (tok !! 0), expr = Add (tok !! 2) (tok !! 4) }
+    "-" -> Just $ M { name = (tok !! 0), expr = Sub (tok !! 2) (tok !! 4) }
+    "/" -> Just $ M { name = (tok !! 0), expr = Div (tok !! 2) (tok !! 4) }
+    "*" -> Just $ M { name = (tok !! 0), expr = Mul (tok !! 2) (tok !! 4) }
+    _ -> Nothing
+  else Nothing
+
+type MExpr = Map.Map String Expr
+type MVal = Map.Map String Int
+
+evalMonkey :: MExpr -> String -> Either String Int
+evalMonkey exprs val = runST (evalMonkeyST exprs val)
+
+binOp :: (Int->Int->Int) -> (Either String Int) -> (Either String Int) -> (Either String Int)
+binOp f a1 a2 =
+  case (a1,a2) of
+    (Left e, _) -> Left e
+    (_, Left e) -> Left e
+    (Right v1, Right v2) -> Right (f v1 v2)
+
+divOp :: (Either String Int) -> (Either String Int) -> (Either String Int)
+divOp a1 a2 =
+  case (a1,a2) of
+    (Left e, _) -> Left e
+    (_, Left e) -> Left e
+    (Right _, Right 0) -> Left "division by zero"
+    (Right v1, Right v2) -> Right (div v1 v2)
+
+-- Takes 6+ minutes to compile if not ignored!
+{-@ lazy evalMonkeyST @-}
+evalMonkeyST :: MExpr -> String -> ST s (Either String Int)
+evalMonkeyST exprs var = do
+    vals <- newSTRef ( Map.empty :: MVal ) 
+    helper var vals where
+      helper :: String -> (STRef s MVal) -> ST s (Either String Int)
+      helper monkeyName vals = do
+        cache <- readSTRef vals
+        case Map.lookup monkeyName cache of
+          Just val -> return $ Right val
+          Nothing -> do
+            x <- case Map.lookup monkeyName exprs of
+              Nothing -> return $ Left $ "Unknown variable " ++ monkeyName
+              Just (Constant v) -> return $ Right v
+              Just (Add m1 m2) -> do
+                v1 <- helper m1 vals
+                v2 <- helper m2 vals
+                return $ binOp (+) v1 v2
+              Just (Mul m1 m2) -> do
+                v1 <- helper m1 vals
+                v2 <- helper m2 vals
+                return $ binOp (*) v1 v2
+              Just (Div m1 m2) -> do
+                v1 <- helper m1 vals
+                v2 <- helper m2 vals
+                return $ divOp v1 v2
+              Just (Sub m1 m2) -> do
+                v1 <- helper m1 vals
+                v2 <- helper m2 vals
+                return $ binOp (-) v1 v2
+            _ <- case x of
+              Left _ -> return $ ()
+              Right intVal -> modifySTRef vals (Map.insert monkeyName intVal)
+            return x
+            
+
+part1 :: [String] -> IO ()
+part1 input = do
+  putStrLn "Part 1"
+  let monkeys = mapMaybe parseMonkey input
+      monkeyMap = Map.fromList (map (\m -> (name m, expr m)) monkeys) in do
+    -- print $ monkeys
+    -- print $ monkeyMap
+    case evalMonkey monkeyMap "root" of
+      Left err -> putStrLn $ "Error: " ++ err
+      Right val -> print $ val
+

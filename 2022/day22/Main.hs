@@ -4,6 +4,8 @@ import LoadLines
 import Data.Vector ((//),(!))
 import qualified Data.Vector as Vec
 import Parse
+import Prelude hiding (null)
+import GHC.List (null)
 
 {-@ type Pos = {n:Int | n > 0} @-}
 
@@ -67,10 +69,11 @@ data Orientation =
   East |    -- towards right, default orientation
   South |
   West
-  
-{-@ data Position = P { xPos :: Nat, yPos :: Nat, facing :: Orientation } @-}
+  deriving (Eq)
+
+{-@ data Position = P { xPos :: Int, yPos :: Int, facing :: Orientation } @-}
 data Position = P { xPos :: Int, yPos:: Int, facing:: Orientation }
-{-@ type InBounds M = {p:Position | Main.xPos p < xSize M && Main.yPos p < ySize M} @-}
+{-@ type InBounds M = {p:Position | Main.xPos p >= 0 && Main.xPos p < xSize M && Main.yPos p >=0 && Main.yPos p < ySize M} @-}
 
 showPos :: Position -> String
 showPos (P x y North) = "(" ++ (show x) ++ "," ++ (show y) ++ ",N)"
@@ -231,9 +234,141 @@ part1 input = do
             else
               print $ (password (last result))
 
+-- transition across an edge (left), or return original coordinates (right)
+-- This is indended to be chained with >>=
+transitionEdge :: Orientation -> Int -> Int -> Int -> Orientation -> Int -> Int -> Int -> Position -> Either Position Position
+transitionEdge North y xStart xEnd newDir y2 xStart2 xEnd2 p | newDir == South || newDir == North =
+  if (yPos p == y && xPos p >= xStart && xPos p <= xEnd && facing p == North) then
+    Left (P (xStart2 + (xPos p - xStart) * (signum (xEnd2 - xStart2))) y2 newDir)
+  else
+    Right p
+transitionEdge North y xStart xEnd newDir x2 yStart2 yEnd2 p | newDir == West || newDir == East =
+  if (yPos p == y && xPos p >= xStart && xPos p <= xEnd && facing p == North) then
+    Left (P x2 (yStart2 + (xPos p - xStart) * (signum (yEnd2 - yStart2))) newDir)
+  else
+    Right p
+transitionEdge South y xStart xEnd newDir y2 xStart2 xEnd2 p | newDir == South || newDir == North =
+  if (yPos p == y && xPos p >= xStart && xPos p <= xEnd && facing p == South) then
+    Left (P (xStart2 + (xPos p - xStart) * (signum (xEnd2 - xStart2))) y2 newDir)
+  else
+    Right p
+transitionEdge South y xStart xEnd newDir x2 yStart2 yEnd2 p | newDir == West || newDir == East =
+  if (yPos p == y && xPos p >= xStart && xPos p <= xEnd && facing p == South) then
+    Left (P x2 (yStart2 + (xPos p - xStart) * (signum (yEnd2 - yStart2))) newDir)
+  else
+    Right p
+transitionEdge West x yStart yEnd newDir y2 xStart2 xEnd2 p | newDir == South || newDir == North =
+  if (xPos p == x && yPos p >= yStart && yPos p <= yEnd && facing p == West) then
+    Left (P (xStart2 + (yPos p - yStart) * (signum (xEnd2 - xStart2))) y2 newDir)
+  else
+    Right p
+transitionEdge West x yStart yEnd newDir x2 yStart2 yEnd2 p | newDir == West || newDir == East =
+  if (xPos p == x && yPos p >= yStart && yPos p <= yEnd && facing p == West) then
+    Left (P x2 (yStart2 + (yPos p - yStart) * (signum (yEnd2 - yStart2))) newDir)
+  else
+    Right p
+transitionEdge East x yStart yEnd newDir y2 xStart2 xEnd2 p | newDir == South || newDir == North =
+  if (xPos p == x && yPos p >= yStart && yPos p <= yEnd && facing p == East) then
+    Left (P (xStart2 + (yPos p - yStart) * (signum (xEnd2 - xStart2))) y2 newDir)
+  else
+    Right p
+transitionEdge East x yStart yEnd newDir x2 yStart2 yEnd2 p | newDir == West || newDir == East =
+  if (xPos p == x && yPos p >= yStart && yPos p <= yEnd && facing p == East) then
+    Left (P x2 (yStart2 + (yPos p - yStart) * (signum (yEnd2 - yStart2))) newDir)
+  else
+    Right p
+transitionEdge _ _ _ _ _ _ _ _ p = Right p
+
+-- If out of bounds, bring back into bounds
+-- Left is remapped, Right is original
+ex1Cube :: Position -> Either Position Position
+ex1Cube p =
+  -- "A" edge
+  transitionEdge North (-1) 8 11 South 4 3 0 p >>=
+  transitionEdge North 3 0 3 South 0 11 8 >>=
+  -- "B" edge
+  transitionEdge East 12 0 3 West 15 11 8 >>=
+  transitionEdge East 16 8 11 West 11 3 0 >>=
+  -- "C" edge
+  transitionEdge West 7 0 3 South 4 4 7 >>=
+  transitionEdge North 3 4 7 East 8 0 3 >>=
+  -- "D" edge
+  transitionEdge East 12 4 7 South 8 15 12 >>=
+  transitionEdge North 7 12 15 West 11 7 4 >>=
+  -- "E" edge
+  transitionEdge West (-1) 4 7 North 11 15 12 >>=
+  transitionEdge South 12 12 15 East 0 7 4 >>=
+  -- "F" edge
+  transitionEdge South 8 0 3 North 11 11 8 >>=
+  transitionEdge South 12 8 11 North 7 3 0 >>=
+  -- "G" edge
+  transitionEdge South 8 4 7 East 8 11 8 >>=
+  transitionEdge West 7 8 11 North 8 7 4
+
+nextSquare :: Position -> Position
+nextSquare (P x y North) = (P x (y-1) North)
+nextSquare (P x y South) = (P x (y+1) South)
+nextSquare (P x y West) = (P (x-1) y West)
+nextSquare (P x y East) = (P (x+1) y East)
+
+{-@ assume ignoredError :: m:Maze -> String -> InBounds m @-}
+{-@ ignore ignoredError @-}
+ignoredError :: Maze -> String -> Position
+ignoredError _ e = error e
+
+{-@ moveOneStep2 :: m:Maze -> x:InBounds m -> InBounds m @-}
+moveOneStep2 :: Maze -> Position -> Position
+moveOneStep2 m oldPos =
+  let walk = nextSquare oldPos
+      newPos = (if xPos walk < 0 || yPos walk < 0 || xPos walk >= xSize m || yPos walk >= ySize m then
+                 ex1Cube walk
+               else if getTile m (xPos walk) (yPos walk) == Empty then
+                 ex1Cube walk
+               else
+                 Left walk) in
+    case newPos of
+      Right _ -> ignoredError m "Failed to wrap edge"
+      Left np ->
+        if xPos np < 0 || yPos np < 0 || xPos np >= xSize m || yPos np >= ySize m then
+          ignoredError m "Out of bounds"
+        else if getTile m (xPos np) (yPos np) == Wall then oldPos
+        else np
+
+{-@ moveNSteps2 :: m:Maze -> InBounds m -> n:Pos -> {l:[InBounds m] | len l >= 1} @-}
+moveNSteps2 :: Maze -> Position -> Int -> [Position]
+moveNSteps2 m oldPos numSteps =
+  tail $ take (numSteps + 1) (iterate (moveOneStep2 m) oldPos)
+
+{-@ followDirections2 :: m:Maze -> InBounds m -> [Direction] -> [InBounds m] @-}
+followDirections2 :: Maze -> Position -> [Direction] -> [Position]
+followDirections2 m start [] = []
+followDirections2 m start (TurnLeft:ds) =
+  followDirections2 m (P (xPos start) (yPos start) (turnLeft (facing start))) ds
+followDirections2 m start (TurnRight:ds) =
+  followDirections2 m (P (xPos start) (yPos start) (turnRight (facing start))) ds
+followDirections2 m start ((Move n):ds) =
+  if n > 0 then
+    let mvs = moveNSteps2 m start n in
+      mvs ++ (followDirections2 m (last mvs) ds)
+  else
+    followDirections2 m start ds
+
+
 part2 :: [String] -> IO ()
 part2 input = do
   putStrLn "Part 2"
+  case readMaze input of
+    Nothing -> putStrLn "parse error"
+    Just m ->
+      case parseDirections exampleDirs of
+        Left e -> putStrLn $ "direction parse error: " ++ e
+        Right dirs ->
+          let result = followDirections2 m (startPosition m) dirs in do
+            print $ result
+            if null result then
+              putStrLn "No results"
+            else
+              print $ (password (last result))
 
 main :: IO ()
 main = runOnLines part1 part2

@@ -236,6 +236,9 @@ part1 input = do
 
 -- transition across an edge (left), or return original coordinates (right)
 -- This is indended to be chained with >>=
+{-@ transitionEdge :: Orientation -> Int -> x1:Int -> {x2:Int | x2 > x1 }
+                   -> Orientation -> Int -> y1:Int -> {y2:Int | y2 - y1 = x2 - x1 || y1 - y2 = x2 - x1}
+                   -> Position -> Either Position Position @-}
 transitionEdge :: Orientation -> Int -> Int -> Int -> Orientation -> Int -> Int -> Int -> Position -> Either Position Position
 transitionEdge North y xStart xEnd newDir y2 xStart2 xEnd2 p | newDir == South || newDir == North =
   if (yPos p == y && xPos p >= xStart && xPos p <= xEnd && facing p == North) then
@@ -305,6 +308,30 @@ ex1Cube p =
   transitionEdge South 8 4 7 East 8 11 8 >>=
   transitionEdge West 7 8 11 North 8 7 4
 
+realCube :: Position -> Either Position Position
+realCube p =
+  -- "A" edge
+  transitionEdge South 200 0 49 South 0 100 149 p >>=
+  transitionEdge North (-1) 100 149 North 199 0 49 >>=
+  -- "B" edge
+  transitionEdge East 150 0 49 West 99 149 100 >>=
+  transitionEdge East 100 100 149 West 149 49 0 >>=
+  -- "C" edge
+  transitionEdge South 50 100 149 West 99 50 99 >>=
+  transitionEdge East 100 50 99 North 49 100 149 >>=
+  -- "D" edge
+  transitionEdge North (-1) 50 99 East 0 150 199 >>=
+  transitionEdge West (-1) 150 199 South 0 50 99 >>=
+  -- "E" edge
+  transitionEdge West 49 0 49 East 0 149 100 >>=
+  transitionEdge West (-1) 100 149 East 50 49 0 >>=
+  -- "F" edge
+  transitionEdge West 49 50 99 South 100 0 49 >>=
+  transitionEdge North 99 0 49 East 50 50 99 >>=
+  -- "G" edge
+  transitionEdge East 50 150 199 North 149 50 99 >>=
+  transitionEdge South 150 50 99 West 49 150 199
+  
 nextSquare :: Position -> Position
 nextSquare (P x y North) = (P x (y-1) North)
 nextSquare (P x y South) = (P x (y+1) South)
@@ -321,9 +348,9 @@ moveOneStep2 :: Maze -> Position -> Position
 moveOneStep2 m oldPos =
   let walk = nextSquare oldPos
       newPos = (if xPos walk < 0 || yPos walk < 0 || xPos walk >= xSize m || yPos walk >= ySize m then
-                 ex1Cube walk
+                 realCube walk
                else if getTile m (xPos walk) (yPos walk) == Empty then
-                 ex1Cube walk
+                 realCube walk
                else
                  Left walk) in
     case newPos of
@@ -360,7 +387,7 @@ part2 input = do
   case readMaze input of
     Nothing -> putStrLn "parse error"
     Just m ->
-      case parseDirections exampleDirs of
+      case parseDirections realDirs of
         Left e -> putStrLn $ "direction parse error: " ++ e
         Right dirs ->
           let result = followDirections2 m (startPosition m) dirs in do

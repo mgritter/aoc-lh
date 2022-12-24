@@ -1,0 +1,367 @@
+Maximize
++1 gr_1 +1 gr_2 +1 gr_3 +1 gr_4 +1 gr_5 +1 gr_6 +1 gr_7 +1 gr_8 +1 gr_9 +1 gr_10 +1 gr_11 +1 gr_12 +1 gr_13 +1 gr_14 +1 gr_15 +1 gr_16 +1 gr_17 +1 gr_18 +1 gr_19 +1 gr_20 +1 gr_21 +1 gr_22 +1 gr_23 +1 gr_24
+Subject To
++1 or_1 = 1
++1 cr_1 = 0
++1 br_1 = 0
++1 gr_1 = 0
++1 o_1 = 0
++1 c_1 = 0
++1 b_1 = 0
++1 build_o_1 +1 build_c_1 +1 build_b_1 +1 build_g_1 <= 1
++1 build_o_2 +1 build_c_2 +1 build_b_2 +1 build_g_2 <= 1
++1 build_o_3 +1 build_c_3 +1 build_b_3 +1 build_g_3 <= 1
++1 build_o_4 +1 build_c_4 +1 build_b_4 +1 build_g_4 <= 1
++1 build_o_5 +1 build_c_5 +1 build_b_5 +1 build_g_5 <= 1
++1 build_o_6 +1 build_c_6 +1 build_b_6 +1 build_g_6 <= 1
++1 build_o_7 +1 build_c_7 +1 build_b_7 +1 build_g_7 <= 1
++1 build_o_8 +1 build_c_8 +1 build_b_8 +1 build_g_8 <= 1
++1 build_o_9 +1 build_c_9 +1 build_b_9 +1 build_g_9 <= 1
++1 build_o_10 +1 build_c_10 +1 build_b_10 +1 build_g_10 <= 1
++1 build_o_11 +1 build_c_11 +1 build_b_11 +1 build_g_11 <= 1
++1 build_o_12 +1 build_c_12 +1 build_b_12 +1 build_g_12 <= 1
++1 build_o_13 +1 build_c_13 +1 build_b_13 +1 build_g_13 <= 1
++1 build_o_14 +1 build_c_14 +1 build_b_14 +1 build_g_14 <= 1
++1 build_o_15 +1 build_c_15 +1 build_b_15 +1 build_g_15 <= 1
++1 build_o_16 +1 build_c_16 +1 build_b_16 +1 build_g_16 <= 1
++1 build_o_17 +1 build_c_17 +1 build_b_17 +1 build_g_17 <= 1
++1 build_o_18 +1 build_c_18 +1 build_b_18 +1 build_g_18 <= 1
++1 build_o_19 +1 build_c_19 +1 build_b_19 +1 build_g_19 <= 1
++1 build_o_20 +1 build_c_20 +1 build_b_20 +1 build_g_20 <= 1
++1 build_o_21 +1 build_c_21 +1 build_b_21 +1 build_g_21 <= 1
++1 build_o_22 +1 build_c_22 +1 build_b_22 +1 build_g_22 <= 1
++1 build_o_23 +1 build_c_23 +1 build_b_23 +1 build_g_23 <= 1
++1 build_o_24 +1 build_c_24 +1 build_b_24 +1 build_g_24 <= 1
+-1 o_1 +4 build_o_1 +4 build_c_1 +2 build_b_1 +3 build_g_1 <= 0
+-1 o_2 +4 build_o_2 +4 build_c_2 +2 build_b_2 +3 build_g_2 <= 0
+-1 o_3 +4 build_o_3 +4 build_c_3 +2 build_b_3 +3 build_g_3 <= 0
+-1 o_4 +4 build_o_4 +4 build_c_4 +2 build_b_4 +3 build_g_4 <= 0
+-1 o_5 +4 build_o_5 +4 build_c_5 +2 build_b_5 +3 build_g_5 <= 0
+-1 o_6 +4 build_o_6 +4 build_c_6 +2 build_b_6 +3 build_g_6 <= 0
+-1 o_7 +4 build_o_7 +4 build_c_7 +2 build_b_7 +3 build_g_7 <= 0
+-1 o_8 +4 build_o_8 +4 build_c_8 +2 build_b_8 +3 build_g_8 <= 0
+-1 o_9 +4 build_o_9 +4 build_c_9 +2 build_b_9 +3 build_g_9 <= 0
+-1 o_10 +4 build_o_10 +4 build_c_10 +2 build_b_10 +3 build_g_10 <= 0
+-1 o_11 +4 build_o_11 +4 build_c_11 +2 build_b_11 +3 build_g_11 <= 0
+-1 o_12 +4 build_o_12 +4 build_c_12 +2 build_b_12 +3 build_g_12 <= 0
+-1 o_13 +4 build_o_13 +4 build_c_13 +2 build_b_13 +3 build_g_13 <= 0
+-1 o_14 +4 build_o_14 +4 build_c_14 +2 build_b_14 +3 build_g_14 <= 0
+-1 o_15 +4 build_o_15 +4 build_c_15 +2 build_b_15 +3 build_g_15 <= 0
+-1 o_16 +4 build_o_16 +4 build_c_16 +2 build_b_16 +3 build_g_16 <= 0
+-1 o_17 +4 build_o_17 +4 build_c_17 +2 build_b_17 +3 build_g_17 <= 0
+-1 o_18 +4 build_o_18 +4 build_c_18 +2 build_b_18 +3 build_g_18 <= 0
+-1 o_19 +4 build_o_19 +4 build_c_19 +2 build_b_19 +3 build_g_19 <= 0
+-1 o_20 +4 build_o_20 +4 build_c_20 +2 build_b_20 +3 build_g_20 <= 0
+-1 o_21 +4 build_o_21 +4 build_c_21 +2 build_b_21 +3 build_g_21 <= 0
+-1 o_22 +4 build_o_22 +4 build_c_22 +2 build_b_22 +3 build_g_22 <= 0
+-1 o_23 +4 build_o_23 +4 build_c_23 +2 build_b_23 +3 build_g_23 <= 0
+-1 o_24 +4 build_o_24 +4 build_c_24 +2 build_b_24 +3 build_g_24 <= 0
+-1 c_1 +0 build_o_1 +0 build_c_1 +10 build_b_1 +0 build_g_1 <= 0
+-1 c_2 +0 build_o_2 +0 build_c_2 +10 build_b_2 +0 build_g_2 <= 0
+-1 c_3 +0 build_o_3 +0 build_c_3 +10 build_b_3 +0 build_g_3 <= 0
+-1 c_4 +0 build_o_4 +0 build_c_4 +10 build_b_4 +0 build_g_4 <= 0
+-1 c_5 +0 build_o_5 +0 build_c_5 +10 build_b_5 +0 build_g_5 <= 0
+-1 c_6 +0 build_o_6 +0 build_c_6 +10 build_b_6 +0 build_g_6 <= 0
+-1 c_7 +0 build_o_7 +0 build_c_7 +10 build_b_7 +0 build_g_7 <= 0
+-1 c_8 +0 build_o_8 +0 build_c_8 +10 build_b_8 +0 build_g_8 <= 0
+-1 c_9 +0 build_o_9 +0 build_c_9 +10 build_b_9 +0 build_g_9 <= 0
+-1 c_10 +0 build_o_10 +0 build_c_10 +10 build_b_10 +0 build_g_10 <= 0
+-1 c_11 +0 build_o_11 +0 build_c_11 +10 build_b_11 +0 build_g_11 <= 0
+-1 c_12 +0 build_o_12 +0 build_c_12 +10 build_b_12 +0 build_g_12 <= 0
+-1 c_13 +0 build_o_13 +0 build_c_13 +10 build_b_13 +0 build_g_13 <= 0
+-1 c_14 +0 build_o_14 +0 build_c_14 +10 build_b_14 +0 build_g_14 <= 0
+-1 c_15 +0 build_o_15 +0 build_c_15 +10 build_b_15 +0 build_g_15 <= 0
+-1 c_16 +0 build_o_16 +0 build_c_16 +10 build_b_16 +0 build_g_16 <= 0
+-1 c_17 +0 build_o_17 +0 build_c_17 +10 build_b_17 +0 build_g_17 <= 0
+-1 c_18 +0 build_o_18 +0 build_c_18 +10 build_b_18 +0 build_g_18 <= 0
+-1 c_19 +0 build_o_19 +0 build_c_19 +10 build_b_19 +0 build_g_19 <= 0
+-1 c_20 +0 build_o_20 +0 build_c_20 +10 build_b_20 +0 build_g_20 <= 0
+-1 c_21 +0 build_o_21 +0 build_c_21 +10 build_b_21 +0 build_g_21 <= 0
+-1 c_22 +0 build_o_22 +0 build_c_22 +10 build_b_22 +0 build_g_22 <= 0
+-1 c_23 +0 build_o_23 +0 build_c_23 +10 build_b_23 +0 build_g_23 <= 0
+-1 c_24 +0 build_o_24 +0 build_c_24 +10 build_b_24 +0 build_g_24 <= 0
+-1 b_1 +0 build_o_1 +0 build_c_1 +0 build_b_1 +14 build_g_1 <= 0
+-1 b_2 +0 build_o_2 +0 build_c_2 +0 build_b_2 +14 build_g_2 <= 0
+-1 b_3 +0 build_o_3 +0 build_c_3 +0 build_b_3 +14 build_g_3 <= 0
+-1 b_4 +0 build_o_4 +0 build_c_4 +0 build_b_4 +14 build_g_4 <= 0
+-1 b_5 +0 build_o_5 +0 build_c_5 +0 build_b_5 +14 build_g_5 <= 0
+-1 b_6 +0 build_o_6 +0 build_c_6 +0 build_b_6 +14 build_g_6 <= 0
+-1 b_7 +0 build_o_7 +0 build_c_7 +0 build_b_7 +14 build_g_7 <= 0
+-1 b_8 +0 build_o_8 +0 build_c_8 +0 build_b_8 +14 build_g_8 <= 0
+-1 b_9 +0 build_o_9 +0 build_c_9 +0 build_b_9 +14 build_g_9 <= 0
+-1 b_10 +0 build_o_10 +0 build_c_10 +0 build_b_10 +14 build_g_10 <= 0
+-1 b_11 +0 build_o_11 +0 build_c_11 +0 build_b_11 +14 build_g_11 <= 0
+-1 b_12 +0 build_o_12 +0 build_c_12 +0 build_b_12 +14 build_g_12 <= 0
+-1 b_13 +0 build_o_13 +0 build_c_13 +0 build_b_13 +14 build_g_13 <= 0
+-1 b_14 +0 build_o_14 +0 build_c_14 +0 build_b_14 +14 build_g_14 <= 0
+-1 b_15 +0 build_o_15 +0 build_c_15 +0 build_b_15 +14 build_g_15 <= 0
+-1 b_16 +0 build_o_16 +0 build_c_16 +0 build_b_16 +14 build_g_16 <= 0
+-1 b_17 +0 build_o_17 +0 build_c_17 +0 build_b_17 +14 build_g_17 <= 0
+-1 b_18 +0 build_o_18 +0 build_c_18 +0 build_b_18 +14 build_g_18 <= 0
+-1 b_19 +0 build_o_19 +0 build_c_19 +0 build_b_19 +14 build_g_19 <= 0
+-1 b_20 +0 build_o_20 +0 build_c_20 +0 build_b_20 +14 build_g_20 <= 0
+-1 b_21 +0 build_o_21 +0 build_c_21 +0 build_b_21 +14 build_g_21 <= 0
+-1 b_22 +0 build_o_22 +0 build_c_22 +0 build_b_22 +14 build_g_22 <= 0
+-1 b_23 +0 build_o_23 +0 build_c_23 +0 build_b_23 +14 build_g_23 <= 0
+-1 b_24 +0 build_o_24 +0 build_c_24 +0 build_b_24 +14 build_g_24 <= 0
+-1 or_2 +1 or_1 +1 build_o_1 = 0
+-1 cr_2 +1 cr_1 +1 build_c_1 = 0
+-1 br_2 +1 br_1 +1 build_b_1 = 0
+-1 gr_2 +1 gr_1 +1 build_g_1 = 0
+-1 or_3 +1 or_2 +1 build_o_2 = 0
+-1 cr_3 +1 cr_2 +1 build_c_2 = 0
+-1 br_3 +1 br_2 +1 build_b_2 = 0
+-1 gr_3 +1 gr_2 +1 build_g_2 = 0
+-1 or_4 +1 or_3 +1 build_o_3 = 0
+-1 cr_4 +1 cr_3 +1 build_c_3 = 0
+-1 br_4 +1 br_3 +1 build_b_3 = 0
+-1 gr_4 +1 gr_3 +1 build_g_3 = 0
+-1 or_5 +1 or_4 +1 build_o_4 = 0
+-1 cr_5 +1 cr_4 +1 build_c_4 = 0
+-1 br_5 +1 br_4 +1 build_b_4 = 0
+-1 gr_5 +1 gr_4 +1 build_g_4 = 0
+-1 or_6 +1 or_5 +1 build_o_5 = 0
+-1 cr_6 +1 cr_5 +1 build_c_5 = 0
+-1 br_6 +1 br_5 +1 build_b_5 = 0
+-1 gr_6 +1 gr_5 +1 build_g_5 = 0
+-1 or_7 +1 or_6 +1 build_o_6 = 0
+-1 cr_7 +1 cr_6 +1 build_c_6 = 0
+-1 br_7 +1 br_6 +1 build_b_6 = 0
+-1 gr_7 +1 gr_6 +1 build_g_6 = 0
+-1 or_8 +1 or_7 +1 build_o_7 = 0
+-1 cr_8 +1 cr_7 +1 build_c_7 = 0
+-1 br_8 +1 br_7 +1 build_b_7 = 0
+-1 gr_8 +1 gr_7 +1 build_g_7 = 0
+-1 or_9 +1 or_8 +1 build_o_8 = 0
+-1 cr_9 +1 cr_8 +1 build_c_8 = 0
+-1 br_9 +1 br_8 +1 build_b_8 = 0
+-1 gr_9 +1 gr_8 +1 build_g_8 = 0
+-1 or_10 +1 or_9 +1 build_o_9 = 0
+-1 cr_10 +1 cr_9 +1 build_c_9 = 0
+-1 br_10 +1 br_9 +1 build_b_9 = 0
+-1 gr_10 +1 gr_9 +1 build_g_9 = 0
+-1 or_11 +1 or_10 +1 build_o_10 = 0
+-1 cr_11 +1 cr_10 +1 build_c_10 = 0
+-1 br_11 +1 br_10 +1 build_b_10 = 0
+-1 gr_11 +1 gr_10 +1 build_g_10 = 0
+-1 or_12 +1 or_11 +1 build_o_11 = 0
+-1 cr_12 +1 cr_11 +1 build_c_11 = 0
+-1 br_12 +1 br_11 +1 build_b_11 = 0
+-1 gr_12 +1 gr_11 +1 build_g_11 = 0
+-1 or_13 +1 or_12 +1 build_o_12 = 0
+-1 cr_13 +1 cr_12 +1 build_c_12 = 0
+-1 br_13 +1 br_12 +1 build_b_12 = 0
+-1 gr_13 +1 gr_12 +1 build_g_12 = 0
+-1 or_14 +1 or_13 +1 build_o_13 = 0
+-1 cr_14 +1 cr_13 +1 build_c_13 = 0
+-1 br_14 +1 br_13 +1 build_b_13 = 0
+-1 gr_14 +1 gr_13 +1 build_g_13 = 0
+-1 or_15 +1 or_14 +1 build_o_14 = 0
+-1 cr_15 +1 cr_14 +1 build_c_14 = 0
+-1 br_15 +1 br_14 +1 build_b_14 = 0
+-1 gr_15 +1 gr_14 +1 build_g_14 = 0
+-1 or_16 +1 or_15 +1 build_o_15 = 0
+-1 cr_16 +1 cr_15 +1 build_c_15 = 0
+-1 br_16 +1 br_15 +1 build_b_15 = 0
+-1 gr_16 +1 gr_15 +1 build_g_15 = 0
+-1 or_17 +1 or_16 +1 build_o_16 = 0
+-1 cr_17 +1 cr_16 +1 build_c_16 = 0
+-1 br_17 +1 br_16 +1 build_b_16 = 0
+-1 gr_17 +1 gr_16 +1 build_g_16 = 0
+-1 or_18 +1 or_17 +1 build_o_17 = 0
+-1 cr_18 +1 cr_17 +1 build_c_17 = 0
+-1 br_18 +1 br_17 +1 build_b_17 = 0
+-1 gr_18 +1 gr_17 +1 build_g_17 = 0
+-1 or_19 +1 or_18 +1 build_o_18 = 0
+-1 cr_19 +1 cr_18 +1 build_c_18 = 0
+-1 br_19 +1 br_18 +1 build_b_18 = 0
+-1 gr_19 +1 gr_18 +1 build_g_18 = 0
+-1 or_20 +1 or_19 +1 build_o_19 = 0
+-1 cr_20 +1 cr_19 +1 build_c_19 = 0
+-1 br_20 +1 br_19 +1 build_b_19 = 0
+-1 gr_20 +1 gr_19 +1 build_g_19 = 0
+-1 or_21 +1 or_20 +1 build_o_20 = 0
+-1 cr_21 +1 cr_20 +1 build_c_20 = 0
+-1 br_21 +1 br_20 +1 build_b_20 = 0
+-1 gr_21 +1 gr_20 +1 build_g_20 = 0
+-1 or_22 +1 or_21 +1 build_o_21 = 0
+-1 cr_22 +1 cr_21 +1 build_c_21 = 0
+-1 br_22 +1 br_21 +1 build_b_21 = 0
+-1 gr_22 +1 gr_21 +1 build_g_21 = 0
+-1 or_23 +1 or_22 +1 build_o_22 = 0
+-1 cr_23 +1 cr_22 +1 build_c_22 = 0
+-1 br_23 +1 br_22 +1 build_b_22 = 0
+-1 gr_23 +1 gr_22 +1 build_g_22 = 0
+-1 or_24 +1 or_23 +1 build_o_23 = 0
+-1 cr_24 +1 cr_23 +1 build_c_23 = 0
+-1 br_24 +1 br_23 +1 build_b_23 = 0
+-1 gr_24 +1 gr_23 +1 build_g_23 = 0
+-1 o_2 +1 o_1 -4 build_o_1 -4 build_c_1 -2 build_b_1 -3 build_g_1 +1 or_1 = 0
+-1 o_3 +1 o_2 -4 build_o_2 -4 build_c_2 -2 build_b_2 -3 build_g_2 +1 or_2 = 0
+-1 o_4 +1 o_3 -4 build_o_3 -4 build_c_3 -2 build_b_3 -3 build_g_3 +1 or_3 = 0
+-1 o_5 +1 o_4 -4 build_o_4 -4 build_c_4 -2 build_b_4 -3 build_g_4 +1 or_4 = 0
+-1 o_6 +1 o_5 -4 build_o_5 -4 build_c_5 -2 build_b_5 -3 build_g_5 +1 or_5 = 0
+-1 o_7 +1 o_6 -4 build_o_6 -4 build_c_6 -2 build_b_6 -3 build_g_6 +1 or_6 = 0
+-1 o_8 +1 o_7 -4 build_o_7 -4 build_c_7 -2 build_b_7 -3 build_g_7 +1 or_7 = 0
+-1 o_9 +1 o_8 -4 build_o_8 -4 build_c_8 -2 build_b_8 -3 build_g_8 +1 or_8 = 0
+-1 o_10 +1 o_9 -4 build_o_9 -4 build_c_9 -2 build_b_9 -3 build_g_9 +1 or_9 = 0
+-1 o_11 +1 o_10 -4 build_o_10 -4 build_c_10 -2 build_b_10 -3 build_g_10 +1 or_10 = 0
+-1 o_12 +1 o_11 -4 build_o_11 -4 build_c_11 -2 build_b_11 -3 build_g_11 +1 or_11 = 0
+-1 o_13 +1 o_12 -4 build_o_12 -4 build_c_12 -2 build_b_12 -3 build_g_12 +1 or_12 = 0
+-1 o_14 +1 o_13 -4 build_o_13 -4 build_c_13 -2 build_b_13 -3 build_g_13 +1 or_13 = 0
+-1 o_15 +1 o_14 -4 build_o_14 -4 build_c_14 -2 build_b_14 -3 build_g_14 +1 or_14 = 0
+-1 o_16 +1 o_15 -4 build_o_15 -4 build_c_15 -2 build_b_15 -3 build_g_15 +1 or_15 = 0
+-1 o_17 +1 o_16 -4 build_o_16 -4 build_c_16 -2 build_b_16 -3 build_g_16 +1 or_16 = 0
+-1 o_18 +1 o_17 -4 build_o_17 -4 build_c_17 -2 build_b_17 -3 build_g_17 +1 or_17 = 0
+-1 o_19 +1 o_18 -4 build_o_18 -4 build_c_18 -2 build_b_18 -3 build_g_18 +1 or_18 = 0
+-1 o_20 +1 o_19 -4 build_o_19 -4 build_c_19 -2 build_b_19 -3 build_g_19 +1 or_19 = 0
+-1 o_21 +1 o_20 -4 build_o_20 -4 build_c_20 -2 build_b_20 -3 build_g_20 +1 or_20 = 0
+-1 o_22 +1 o_21 -4 build_o_21 -4 build_c_21 -2 build_b_21 -3 build_g_21 +1 or_21 = 0
+-1 o_23 +1 o_22 -4 build_o_22 -4 build_c_22 -2 build_b_22 -3 build_g_22 +1 or_22 = 0
+-1 o_24 +1 o_23 -4 build_o_23 -4 build_c_23 -2 build_b_23 -3 build_g_23 +1 or_23 = 0
+-1 c_2 +1 c_1 +0 build_o_1 +0 build_c_1 -10 build_b_1 +0 build_g_1 +1 cr_1 = 0
+-1 c_3 +1 c_2 +0 build_o_2 +0 build_c_2 -10 build_b_2 +0 build_g_2 +1 cr_2 = 0
+-1 c_4 +1 c_3 +0 build_o_3 +0 build_c_3 -10 build_b_3 +0 build_g_3 +1 cr_3 = 0
+-1 c_5 +1 c_4 +0 build_o_4 +0 build_c_4 -10 build_b_4 +0 build_g_4 +1 cr_4 = 0
+-1 c_6 +1 c_5 +0 build_o_5 +0 build_c_5 -10 build_b_5 +0 build_g_5 +1 cr_5 = 0
+-1 c_7 +1 c_6 +0 build_o_6 +0 build_c_6 -10 build_b_6 +0 build_g_6 +1 cr_6 = 0
+-1 c_8 +1 c_7 +0 build_o_7 +0 build_c_7 -10 build_b_7 +0 build_g_7 +1 cr_7 = 0
+-1 c_9 +1 c_8 +0 build_o_8 +0 build_c_8 -10 build_b_8 +0 build_g_8 +1 cr_8 = 0
+-1 c_10 +1 c_9 +0 build_o_9 +0 build_c_9 -10 build_b_9 +0 build_g_9 +1 cr_9 = 0
+-1 c_11 +1 c_10 +0 build_o_10 +0 build_c_10 -10 build_b_10 +0 build_g_10 +1 cr_10 = 0
+-1 c_12 +1 c_11 +0 build_o_11 +0 build_c_11 -10 build_b_11 +0 build_g_11 +1 cr_11 = 0
+-1 c_13 +1 c_12 +0 build_o_12 +0 build_c_12 -10 build_b_12 +0 build_g_12 +1 cr_12 = 0
+-1 c_14 +1 c_13 +0 build_o_13 +0 build_c_13 -10 build_b_13 +0 build_g_13 +1 cr_13 = 0
+-1 c_15 +1 c_14 +0 build_o_14 +0 build_c_14 -10 build_b_14 +0 build_g_14 +1 cr_14 = 0
+-1 c_16 +1 c_15 +0 build_o_15 +0 build_c_15 -10 build_b_15 +0 build_g_15 +1 cr_15 = 0
+-1 c_17 +1 c_16 +0 build_o_16 +0 build_c_16 -10 build_b_16 +0 build_g_16 +1 cr_16 = 0
+-1 c_18 +1 c_17 +0 build_o_17 +0 build_c_17 -10 build_b_17 +0 build_g_17 +1 cr_17 = 0
+-1 c_19 +1 c_18 +0 build_o_18 +0 build_c_18 -10 build_b_18 +0 build_g_18 +1 cr_18 = 0
+-1 c_20 +1 c_19 +0 build_o_19 +0 build_c_19 -10 build_b_19 +0 build_g_19 +1 cr_19 = 0
+-1 c_21 +1 c_20 +0 build_o_20 +0 build_c_20 -10 build_b_20 +0 build_g_20 +1 cr_20 = 0
+-1 c_22 +1 c_21 +0 build_o_21 +0 build_c_21 -10 build_b_21 +0 build_g_21 +1 cr_21 = 0
+-1 c_23 +1 c_22 +0 build_o_22 +0 build_c_22 -10 build_b_22 +0 build_g_22 +1 cr_22 = 0
+-1 c_24 +1 c_23 +0 build_o_23 +0 build_c_23 -10 build_b_23 +0 build_g_23 +1 cr_23 = 0
+-1 b_2 +1 b_1 +0 build_o_1 +0 build_c_1 +0 build_b_1 -14 build_g_1 +1 br_1 = 0
+-1 b_3 +1 b_2 +0 build_o_2 +0 build_c_2 +0 build_b_2 -14 build_g_2 +1 br_2 = 0
+-1 b_4 +1 b_3 +0 build_o_3 +0 build_c_3 +0 build_b_3 -14 build_g_3 +1 br_3 = 0
+-1 b_5 +1 b_4 +0 build_o_4 +0 build_c_4 +0 build_b_4 -14 build_g_4 +1 br_4 = 0
+-1 b_6 +1 b_5 +0 build_o_5 +0 build_c_5 +0 build_b_5 -14 build_g_5 +1 br_5 = 0
+-1 b_7 +1 b_6 +0 build_o_6 +0 build_c_6 +0 build_b_6 -14 build_g_6 +1 br_6 = 0
+-1 b_8 +1 b_7 +0 build_o_7 +0 build_c_7 +0 build_b_7 -14 build_g_7 +1 br_7 = 0
+-1 b_9 +1 b_8 +0 build_o_8 +0 build_c_8 +0 build_b_8 -14 build_g_8 +1 br_8 = 0
+-1 b_10 +1 b_9 +0 build_o_9 +0 build_c_9 +0 build_b_9 -14 build_g_9 +1 br_9 = 0
+-1 b_11 +1 b_10 +0 build_o_10 +0 build_c_10 +0 build_b_10 -14 build_g_10 +1 br_10 = 0
+-1 b_12 +1 b_11 +0 build_o_11 +0 build_c_11 +0 build_b_11 -14 build_g_11 +1 br_11 = 0
+-1 b_13 +1 b_12 +0 build_o_12 +0 build_c_12 +0 build_b_12 -14 build_g_12 +1 br_12 = 0
+-1 b_14 +1 b_13 +0 build_o_13 +0 build_c_13 +0 build_b_13 -14 build_g_13 +1 br_13 = 0
+-1 b_15 +1 b_14 +0 build_o_14 +0 build_c_14 +0 build_b_14 -14 build_g_14 +1 br_14 = 0
+-1 b_16 +1 b_15 +0 build_o_15 +0 build_c_15 +0 build_b_15 -14 build_g_15 +1 br_15 = 0
+-1 b_17 +1 b_16 +0 build_o_16 +0 build_c_16 +0 build_b_16 -14 build_g_16 +1 br_16 = 0
+-1 b_18 +1 b_17 +0 build_o_17 +0 build_c_17 +0 build_b_17 -14 build_g_17 +1 br_17 = 0
+-1 b_19 +1 b_18 +0 build_o_18 +0 build_c_18 +0 build_b_18 -14 build_g_18 +1 br_18 = 0
+-1 b_20 +1 b_19 +0 build_o_19 +0 build_c_19 +0 build_b_19 -14 build_g_19 +1 br_19 = 0
+-1 b_21 +1 b_20 +0 build_o_20 +0 build_c_20 +0 build_b_20 -14 build_g_20 +1 br_20 = 0
+-1 b_22 +1 b_21 +0 build_o_21 +0 build_c_21 +0 build_b_21 -14 build_g_21 +1 br_21 = 0
+-1 b_23 +1 b_22 +0 build_o_22 +0 build_c_22 +0 build_b_22 -14 build_g_22 +1 br_22 = 0
+-1 b_24 +1 b_23 +0 build_o_23 +0 build_c_23 +0 build_b_23 -14 build_g_23 +1 br_23 = 0
+
+Binary
+build_g_1
+build_g_2
+build_g_3
+build_g_4
+build_g_5
+build_g_6
+build_g_7
+build_g_8
+build_g_9
+build_g_10
+build_g_11
+build_g_12
+build_g_13
+build_g_14
+build_g_15
+build_g_16
+build_g_17
+build_g_18
+build_g_19
+build_g_20
+build_g_21
+build_g_22
+build_g_23
+build_g_24
+build_b_1
+build_b_2
+build_b_3
+build_b_4
+build_b_5
+build_b_6
+build_b_7
+build_b_8
+build_b_9
+build_b_10
+build_b_11
+build_b_12
+build_b_13
+build_b_14
+build_b_15
+build_b_16
+build_b_17
+build_b_18
+build_b_19
+build_b_20
+build_b_21
+build_b_22
+build_b_23
+build_b_24
+build_c_1
+build_c_2
+build_c_3
+build_c_4
+build_c_5
+build_c_6
+build_c_7
+build_c_8
+build_c_9
+build_c_10
+build_c_11
+build_c_12
+build_c_13
+build_c_14
+build_c_15
+build_c_16
+build_c_17
+build_c_18
+build_c_19
+build_c_20
+build_c_21
+build_c_22
+build_c_23
+build_c_24
+build_o_1
+build_o_2
+build_o_3
+build_o_4
+build_o_5
+build_o_6
+build_o_7
+build_o_8
+build_o_9
+build_o_10
+build_o_11
+build_o_12
+build_o_13
+build_o_14
+build_o_15
+build_o_16
+build_o_17
+build_o_18
+build_o_19
+build_o_20
+build_o_21
+build_o_22
+build_o_23
+build_o_24
+
+End

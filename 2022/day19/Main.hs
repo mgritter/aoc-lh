@@ -5,6 +5,7 @@ import Data.List.Split
 import Data.List
 import Data.Maybe
 import qualified Data.Set as Set
+import Cplex
 
 {-@ 
 data Resources =
@@ -20,115 +21,21 @@ data Resources =
        geode :: Int }
   deriving (Show,Eq,Ord)
 
-{-@ totalResources :: Resources -> Nat @-}
-totalResources :: Resources -> Int
-totalResources r = ore r + clay r + obsidian r + geode r
-{-@ inline totalResources @-}
-
-{-@ add :: r1:Resources -> r2:Resources -> {s:Resources |
-  ore s = ore r1 + ore r2 &&
-  clay s = clay r1 + clay r2 &&
-  obsidian s = obsidian r1 + obsidian r2 &&
-  geode s = geode r1 + geode r2
-} @-}
-add :: Resources -> Resources -> Resources
-add r1 r2 = RS {
-  ore = ore r1 + ore r2,
-  clay = clay r1 + clay r2,
-  obsidian = obsidian r1 + obsidian r2,
-  geode = geode r1 + geode r2
-  }
-
-mult :: Int -> Resources -> Resources
-mult s r1 = RS {
-  ore = s * ore r1,
-  clay = s * clay r1,
-  obsidian = s * obsidian r1,
-  geode = s * geode r1
-  }
-
--- True if r1 >= r2 pointwise
-resourceGte :: Resources -> Resources -> Bool
-resourceGte r1 r2 =
-  ore r1 >= ore r2 &&
-  clay r1 >= clay r2 &&
-  obsidian r1 >= obsidian r2 &&
-  geode r1 >= geode r2
-{-@ inline resourceGte @-}
-
-{-@ sub :: a:Resources -> {b:Resources | resourceGte a b && totalResources b > 0}
- -> {c:Resources | totalResources c = totalResources a - totalResources b} @-}
-sub :: Resources -> Resources -> Resources
-sub r1 r2 = RS {
-  ore = ore r1 - ore r2,
-  clay = clay r1 - clay r2,
-  obsidian = obsidian r1 - obsidian r2,
-  geode = geode r1 - geode r2
-  }
-  
-{-@ 
-data SearchState =
-  SS { timeRemaining :: Nat,
-       resources :: Resources,
-       robots :: Resources,
-       report :: String }
-@-}
-data SearchState =
-  SS { timeRemaining :: Int,
-       resources :: Resources,
-       robots :: Resources,
-       report :: String }
-
-showState :: SearchState -> String
-showState (SS tr inventory robots _) =
-  "tr " ++ (show tr) ++ " (O" ++ (show $ ore inventory)
-  ++ ", C" ++ (show $ clay inventory)
-  ++ ", B" ++ (show $ obsidian inventory)
-  ++ ", G" ++ (show $ geode inventory)
-  ++ ") (O" ++ (show $ ore robots)
-  ++ ", C" ++ (show $ clay robots)
-  ++ ", B" ++ (show $ obsidian robots)
-  ++ ", G" ++ (show $ geode robots) ++ ")"
-
-eqState :: SearchState -> SearchState -> Bool
-eqState s1 s2 = timeRemaining s1 == timeRemaining s2 && robots s1 == robots s2 && resources s1 == resources s2
-
-compareState :: SearchState -> SearchState -> Ordering
-compareState s1 s2 = compare (timeRemaining s1, resources s1, robots s1) (timeRemaining s2, resources s2, robots s2)
-
-instance Show SearchState where show = showState
-instance Eq SearchState where
-  (==) = eqState
-  (/=) = (\a b -> not (eqState a b))
-instance Ord SearchState where compare = compareState
-
 {-@
 data Recipe =
   RC { recipeId :: Nat,
-       costs :: [({robot:Resources | ore robot + clay robot + obsidian robot + geode robot = 1},
-                  {costs:Resources | totalResources costs > 0})]
-     }
+       oreCost :: Resources,
+       clayCost :: Resources,
+       obsidianCost :: Resources,
+       geodeCost :: Resources }
 @-}
 data Recipe =
   RC { recipeId :: Int,
-       costs :: [(Resources,Resources)] -- List of (robot, cost) pairs
+       oreCost :: Resources,
+       clayCost :: Resources,
+       obsidianCost :: Resources,
+       geodeCost :: Resources
      }
-
--- Return all possibilities for what we can build with the existing resources
--- Oops, assembly robot can only work on one thing!  So only one robot build is possible.
--- List is (new robots, remaining resources)
-{-@ canBuild :: recipe:Recipe -> avail:Resources -> {options:[(Resources,Resources)] | len options > 0}
-   / [ len (costs recipe) ]
-@-}
-canBuild :: Recipe -> Resources -> [(Resources,Resources)]
-canBuild (RC _ []) available = [(RS 0 0 0 0, available)]
-canBuild (RC i ((newRobots, costs):rest)) available =
-          if available `resourceGte` costs then
-            (newRobots,sub available costs):
-            (canBuild (RC i rest) available)
-          else
-            canBuild (RC i rest) available
-    
 
 --    0      1   2   3    4     5    6  7   8     9   10     11  12 13    14    15      16   17   18  
 -- Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 4 ore. Each obsidian robot costs 3
@@ -150,164 +57,131 @@ parseRecipe s = let tok = splitOneOf " " s in
     if id > 0 && c1 > 0 && c2 > 0 && c3 > 0 && c4 > 0 && c3 + c4 > 0 && c5 >0 && c6 > 0 && c5 + c6 > 0 then    
       Just $ RC {
       recipeId = id,
-      costs = [
-          (RS 1 0 0 0, RS c1 0 0 0),
-          (RS 0 1 0 0, RS c2 0 0 0),
-          (RS 0 0 1 0, RS c3 c4 0 0),
-          (RS 0 0 0 1, RS c5 0 c6 0)
-          ] }
+      oreCost = RS c1 0 0 0,
+      clayCost = RS c2 0 0 0,
+      obsidianCost = RS c3 c4 0 0,
+      geodeCost = RS c5 0 c6 0
+      }
     else
       Nothing
 
--- Plan: DFS (really?)
--- Later: come up with bound and do branch-and-bound?
-
--- Initial plan: search time by time
-{-@ successors :: Recipe -> {s:SearchState | timeRemaining s > 0}
-  -> [{succ:SearchState | timeRemaining succ = timeRemaining s - 1}] @-}
-successors :: Recipe -> SearchState -> [SearchState]
-successors r s =
-  map nextTimePeriod (canBuild r (resources s)) where
-    nextTimePeriod (newRobots, remaining) =
-      let resourcesAtEnd = add (robots s) remaining in
-        SS { timeRemaining = timeRemaining s - 1,
-             resources = resourcesAtEnd,
-             robots = add (robots s) newRobots,
-             report = (report s) ++ "Time " ++ (show (timeRemaining s)) ++ " built " ++ (show newRobots) ++ " have " ++ (show resourcesAtEnd) ++ "\n" }
-
--- The current search tree looks like:
---             N
---        ore / \ do nothing
---              N+1
---             /  \ do nothing
---           ore  N+2
---                / \ do nothing
---
--- Should we prune 'ore' from our choices after passing on it?  Or pick our next "purchase" and
--- wait until that is feasible?
-
--- Is it a LP?
---
 -- (robots_it, resources_it, purchases_it)
 --   s.t resources_it >= cost (purchases_it)
 --       robots_i(t+1) = robots_i(t) + purchases_i(t)
 --       resources_i(t+1) = resources_it - cost(purchases_it) + robots_it
 -- Yes, an ILP :(
 
-{-
--- Return the next time when the given amount of resources are available, or Nothing if never
-{-@ timeAvailable :: SearchState -> r:Resources -> Maybe {s2:SearchState | resourceGte (resources s2) r} @-}
-timeAvailable :: SearchState -> Resources -> Maybe SearchState
-timeAvailable ss needed =
-  let timeNeeded target production =
-        if production == 0 then
-          if req > 0 then Nothing else Some $ 0
-        else Some $ (target + production - 1) `div` production
-      timeNeeded2 have need production =
-        if have < need then timeNeeded (need - have) production else Some $ 0
-      timeVector = [timeNeeded2 (ore (resources ss)) (ore needed) (ore (robots ss)),
-                    timeNeeded2 (clay (resources ss)) (clay needed) (clay (robots ss)),
-                    timeNeeded2 (obsidian (resources ss)) (obsidian needed) (obsidian (robots ss)),
-                    timeNeeded2 (quartz (resources ss)) (quartz needed) (quartz (robots ss))]
-      t = maximum $ map (fromMaybe 1000) timeVector in
-    if t == 1000 then None
-    else advanceTime t ss
+equality :: [(Int,String)] -> String -> Constraint
+equality clauses var =
+  SuchThat (((-1),var):clauses) Equal 0
 
-advanceTime :: SearchState -> Int -> Maybe SearchState
-advanceTime ss t =
-  if (timeRemaining ss) > t then Nothing
-  else SS {
-    timeRemaining = timeRemaining - t,
-    resources = add (resources ss) (mult t (robots ss)),
-    robots = robots ss,
-    report = report ss ++ "Wait " ++ (show t ) ++ " minutes\n"
-    }
+equalInt :: String -> Int -> Constraint
+equalInt var n =
+  SuchThat [(1,var)] Equal n
 
-{-@ successors2 :: Recipe -> {s:SearchState | timeRemaining s > 0}
-  -> [{succ:SearchState | timeRemaining succ < timeRemaining s ||
-                          resourceGte (resources s) (resources succ) }] @-}
-successors2 :: Recipe -> SearchState -> [SearchState]
-successors2 r s =
-  ifEmptyThenAdvanceTime (mapMaybe buildNext (costs r)) where
-  buildNext (robot,cost) =
-    case timeAvailable s cost of
-      Nothing -> Nothing
-      Just future -> 
-        SS { timeRemaining = timeRemaining s - 1,
-             resources = resourcesAtEnd,
-             robots = add (robots s) newRobots,
-             report = (report s) ++ "Time " ++ (show (timeRemaining s)) ++ " built " ++ (show newRobots) ++ " have " ++ (show resourcesAtEnd) ++ "\n" }
-      
-  
-  map nextTimePeriod (canBuild r (resources s)) where
-    nextTimePeriod (newRobots, remaining) =
-      let resourcesAtEnd = add (robots s) remaining in
-        SS { timeRemaining = timeRemaining s - 1,
-             resources = resourcesAtEnd,
-             robots = add (robots s) newRobots,
-             report = (report s) ++ "Time " ++ (show (timeRemaining s)) ++ " built " ++ (show newRobots) ++ " have " ++ (show resourcesAtEnd) ++ "\n" }
--}
+-- ax1 + bx2 <= x3 iff
+-- ax1 + bx2 - x3 <= 0
+lte :: [(Int,String)] -> String -> Constraint
+lte clauses var =
+  SuchThat (((-1),var):clauses) Lte 0
 
-orderByGeodes :: SearchState -> SearchState -> Ordering
-orderByGeodes a b = compare (geode (resources a)) (geode (resources b))
+chooseOne :: [String] -> Constraint
+chooseOne vars =
+  SuchThat (map (\v -> (1,v)) vars) Lte 1
 
-{-@ dfsMostGeodes :: Recipe -> start:SearchState -> Set.Set SearchState -> (SearchState, Set.Set SearchState)
-  / [timeRemaining start] @-}
-dfsMostGeodes :: Recipe -> SearchState -> Set.Set SearchState -> (SearchState, Set.Set SearchState)
-dfsMostGeodes recipe start visited0 =
-  if timeRemaining start == 0 then (start,visited0) else
-    let ss = successors recipe start in
-      {-@ visit :: succ:[{x:SearchState | timeRemaining x < timeRemaining start && timeRemaining x >= 0}]
-                   -> Set.Set SearchState
-                   -> SearchState -> (SearchState, Set.Set SearchState)
-                   / [len succ] @-}
-      visit ss visited0 start where
-      visit :: [SearchState] -> Set.Set SearchState -> SearchState -> (SearchState, Set.Set SearchState)
-      visit [] visited best = (best,visited)
-      visit (s':rest) visited best =
-        if Set.member s' visited then
-          visit rest visited best
-        else
-          let (b', v') = dfsMostGeodes recipe s' (visited `Set.union` (Set.singleton s')) in
-            visit rest v' (if orderByGeodes best b' == GT then best else b')
+-- gr_i = geode robots on start of minute i
+-- br_i = obsidian robots on start of minute i
+-- cl_i = clay robots on start of minute i
+-- or_i = ore robots on start of minute i
+-- b_i, c_i, o_i = obsidian, clay, ore inventory on start of minute i
+-- build_g_i, build_b_i, build_c_i, build_o_i = decision to build in minute i, must sum to 0 or 1
 
-{-@ dfsStream :: Recipe -> s:SearchState -> [SearchState] @-}
-{-@ lazy dfsStream @-}
-dfsStream :: Recipe -> SearchState -> [SearchState]
-dfsStream recipe start =
-  if timeRemaining start == 0 then [start] else
-    let ss = successors recipe start in
-      start:(ss >>= dfsStream recipe)
-
-initState :: SearchState
-initState = SS { timeRemaining = 24,
-                 resources = RS 0 0 0 0,
-                 robots = RS 1 0 0 0,
-                 report = "" }
-  
-qualityLevel :: Recipe -> Int
-qualityLevel r =
-  let (maxG, _) = dfsMostGeodes r initState Set.empty in
-    (geode (resources maxG)) * (recipeId r)
-
+mipProblem :: Recipe -> Int -> MipProblem
+mipProblem r maxTime =
+  MIP { objective = geodeSum,
+        constraints = initState ++ buildAtMostOne ++ haveEnoughResources ++ nextMinute,
+        boolVariables = buildVars } where
+  buildVar m i = "build_" ++ m ++ "_" ++ (show i)
+  robotVar m i = m ++ "r_" ++ (show i)
+  invVar m i = m ++ "_" ++ (show i)
+  buildVars = [ buildVar m i | m <- ["g", "b", "c", "o"], i <- [1..maxTime] ]
+  -- maximize geodes built, one per robot that exists at the start of each minute
+  geodeSum = [(1,robotVar "g" i) | i <- [1..maxTime]]
+  -- start with one ore robot and nothing else
+  initState = [equalInt (robotVar "o" 1) 1,
+               equalInt (robotVar "c" 1) 0,
+               equalInt (robotVar "b" 1) 0,
+               equalInt (robotVar "g" 1) 0,
+               equalInt (invVar "o" 1) 0,
+               equalInt (invVar "c" 1) 0,
+               equalInt (invVar "b" 1) 0]
+  -- Choose at most one robot to build
+  buildAtMostOne = [chooseOne [(buildVar "o" i), (buildVar "c" i),
+                               (buildVar "b" i), (buildVar "g" i)]
+                   | i <- [1..maxTime] ]
+  -- Build choice must have enough resources
+  resourceBound accessor var = [ lte [(accessor (oreCost r),buildVar "o" i),
+                                      (accessor (clayCost r),buildVar "c" i),
+                                      (accessor (obsidianCost r),buildVar "b" i),
+                                      (accessor (geodeCost r),buildVar "g" i)]
+                                 (var i) | i <- [1 .. maxTime] ]
+  haveEnoughResources = (resourceBound ore (invVar "o")) ++
+                        (resourceBound clay (invVar "c")) ++
+                        (resourceBound obsidian (invVar "b"))
+  -- resources = old - build costs + production
+  nextResources m accessor = [ equality [(1,invVar m i),
+                                         ((-1) * (accessor (oreCost r)),buildVar "o" i),
+                                         ((-1) * (accessor (clayCost r)),buildVar "c" i),
+                                         ((-1) * (accessor (obsidianCost r)),buildVar "b" i),
+                                         ((-1) * (accessor (geodeCost r)),buildVar "g" i),
+                                         (1,robotVar m i)]
+                               (invVar m (i+1)) | i <- [1 .. maxTime - 1] ]
+  -- robots = old + production
+  nextRobots = [ equality [(1,robotVar m i),
+                           (1,buildVar m i)]
+                 (robotVar m (i+1)) | i <- [1 .. maxTime-1], m <- ["o", "c", "b", "g" ] ]
+  nextMinute = nextRobots ++
+               nextResources "o" ore ++
+               nextResources "c" clay ++
+               nextResources "b" obsidian 
+                  
 part1 :: [String] -> IO ()
 part1 input = do
   putStrLn "Part 1"
   let recipes = mapMaybe parseRecipe input
-      qls = map (\r -> (r, qualityLevel r)) recipes in do
-    if length recipes >= 2 then do
-      -- _ <- mapM print (dfsStream (recipes !! 0) initState)
-      putStrLn (report $ fst $ dfsMostGeodes (recipes !! 0) initState Set.empty)
-      putStrLn (report $ fst $ dfsMostGeodes (recipes !! 1) initState Set.empty)
-    else do
-      putStrLn "Too few recipes!"
-    _ <- mapM (\(r,q) -> 
-                  putStrLn $ "Recipe " ++ (show (recipeId r)) ++ " quality " ++ (show q)) qls
-    print (sum $ map snd qls)
+      probs = map (\r -> mipProblem r 24) recipes
+      rp = zip recipes probs
+      run1 (r,p) = do
+        out <- runCplex p ("part1-" ++ (show (recipeId r)))
+        case out of
+          Left e -> do
+            putStrLn $ (show (recipeId r)) ++ " error: " ++  e
+            return 0
+          Right v -> do
+            putStrLn $ (show (recipeId r)) ++ " geodes: " ++ (show v)
+            return $ (recipeId r) * v            
+    in do
+    vals <- mapM run1 rp
+    print (sum vals)
 
 part2 :: [String] -> IO ()
 part2 input = do
   putStrLn "Part 2"
+  let recipes = take 3 $ mapMaybe parseRecipe input
+      probs = map (\r -> mipProblem r 32) recipes
+      rp = zip recipes probs
+      run1 (r,p) = do
+        out <- runCplex p ("part2-" ++ (show (recipeId r)))
+        case out of
+          Left e -> do
+            putStrLn $ (show (recipeId r)) ++ " error: " ++  e
+            return 0
+          Right v -> do
+            putStrLn $ (show (recipeId r)) ++ " geodes: " ++ (show v)
+            return $ v            
+    in do
+    vals <- mapM run1 rp
+    print (foldl1 (*) vals)
 
 main :: IO ()
 main = runOnLines part1 part2
